@@ -34,11 +34,11 @@ def load_ml_models():
     base_path = os.path.dirname(__file__)
     model_path = os.path.join(base_path, "recommender_fixed.pkl")
     prep_path = os.path.join(base_path, "preprocessor_fixed.pkl")
-    
+   
     try:
         if not os.path.exists(model_path) or not os.path.exists(prep_path):
             return None, None, "Files not found!"
-            
+           
         recommender = joblib.load(model_path)
         preprocessor = joblib.load(prep_path)
         return recommender, preprocessor, True
@@ -49,7 +49,7 @@ recommender, preprocessor, ml_status = load_ml_models()
 ml_loaded = (ml_status is True)
 
 
-# Configuration and Styling
+# Configuration and styling
 st.set_page_config(page_title="Candidate Data Manager", page_icon="📋", layout="wide")
 
 st.markdown("""
@@ -59,7 +59,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Constants & Data Mapping 
+# Constants and data mapping
 MAIN_CSV = "dataset_min_main.csv"
 SUB_CSV = "user_submissions.csv"
 
@@ -67,14 +67,14 @@ CITIES = ['Balti', 'Cahul', 'Chisinau', 'Comrat', 'Edinet', 'Orhei', 'Soroca', '
 
 SKILLS_MAP = {
     "Tech & Development": {
-        "Backend": "Tech_Backend", "Frontend": "Tech_Frontend", 
+        "Backend": "Tech_Backend", "Frontend": "Tech_Frontend",
         "DevOps/Cloud": "Tech_DevOps_Cloud", "Data & AI": "Tech_Data_AI"
     },
     "Business & Management": {
         "Project/Agile": "Mgmt_Project_Agile", "Strategic Leadership": "Mgmt_Strategic_Leadership"
     },
     "Finance & Legal": {
-        "Accounting/Audit": "Fin_Accounting_Audit", "Analysis/Investment": "Fin_Analysis_Investment", 
+        "Accounting/Audit": "Fin_Accounting_Audit", "Analysis/Investment": "Fin_Analysis_Investment",
         "Legal Services": "Legal_Services"
     },
     "Marketing & Creative": {
@@ -90,11 +90,11 @@ SKILLS_MAP = {
 
 BENEFITS = [
     "Bonuses and Incentive Programs", "Casual Dress Code", "Childcare Assistance",
-    "Employee Assistance Programs (EAP)", "Employee Discounts", "Employee Recognition Programs", 
+    "Employee Assistance Programs (EAP)", "Employee Discounts", "Employee Recognition Programs",
     "Employee Referral Programs", "Financial Counseling", "Flexible Spending Accounts (FSAs)",
-    "Flexible Work Arrangements", "Health Insurance", "Health and Wellness Facilities", 
+    "Flexible Work Arrangements", "Health Insurance", "Health and Wellness Facilities",
     "Legal Assistance", "Life and Disability Insurance", "Paid Time Off (PTO)",
-    "Parental Leave", "Professional Development", "Profit-Sharing", "Relocation Assistance", 
+    "Parental Leave", "Professional Development", "Profit-Sharing", "Relocation Assistance",
     "Retirement Plans", "Social and Recreational Activities", "Stock Options or Equity Grants",
     "Transportation Benefits", "Tuition Reimbursement", "Wellness Programs"
 ]
@@ -120,37 +120,38 @@ QUALIFICATIONS = {
     'Doctorate': 5
 }
 
-tech_cols = ['Tech_Backend', 'Tech_Frontend', 'Tech_DevOps_Cloud', 
-            'Tech_Data_AI', 'Mgmt_Project_Agile', 'Mgmt_Strategic_Leadership', 
-            'Fin_Accounting_Audit', 'Fin_Analysis_Investment', 'Legal_Services', 
-            'Mkt_Digital_SEO', 'Creative_Design_Art', 'Health_Medical', 
+# Lists of columns we need for the model to work
+tech_cols = ['Tech_Backend', 'Tech_Frontend', 'Tech_DevOps_Cloud',
+            'Tech_Data_AI', 'Mgmt_Project_Agile', 'Mgmt_Strategic_Leadership',
+            'Fin_Accounting_Audit', 'Fin_Analysis_Investment', 'Legal_Services',
+            'Mkt_Digital_SEO', 'Creative_Design_Art', 'Health_Medical',
             'Science_Engineering', 'Service_Events', 'Service_Specialized']
 
-benefit_cols = ['Female', 'Male', 'Cahul', 'Chisinau', 
-                 'Comrat', 'Edinet', 'Orhei', 'Soroca', 'Stauceni', 'Tiraspol', 
-                 'Ungheni', 'Bonuses and Incentive Programs', 'Casual Dress Code', 
-                 'Childcare Assistance', 'Employee Assistance Programs (EAP)', 
-                 'Employee Discounts', 'Employee Recognition Programs', 'Employee Referral Programs', 
-                 'Financial Counseling', 'Flexible Spending Accounts (FSAs)', 'Flexible Work Arrangements', 
-                 'Health Insurance', 'Health and Wellness Facilities', 'Legal Assistance', 'Life and Disability Insurance', 
-                 'Paid Time Off (PTO)', 'Parental Leave', 'Professional Development', 'Profit-Sharing', 
-                 'Relocation Assistance', 'Retirement Plans', 'Social and Recreational Activities', 
+benefit_cols = ['Female', 'Male', 'Cahul', 'Chisinau',
+                 'Comrat', 'Edinet', 'Orhei', 'Soroca', 'Stauceni', 'Tiraspol',
+                 'Ungheni', 'Bonuses and Incentive Programs', 'Casual Dress Code',
+                 'Childcare Assistance', 'Employee Assistance Programs (EAP)',
+                 'Employee Discounts', 'Employee Recognition Programs', 'Employee Referral Programs',
+                 'Financial Counseling', 'Flexible Spending Accounts (FSAs)', 'Flexible Work Arrangements',
+                 'Health Insurance', 'Health and Wellness Facilities', 'Legal Assistance', 'Life and Disability Insurance',
+                 'Paid Time Off (PTO)', 'Parental Leave', 'Professional Development', 'Profit-Sharing',
+                 'Relocation Assistance', 'Retirement Plans', 'Social and Recreational Activities',
                  'Stock Options or Equity Grants', 'Transportation Benefits', 'Tuition Reimbursement', 'Wellness Programs']
 
-required_cols = ['Qualifications', 'Work Type', 'Min_experience', 'Max_experience', 
-                 'Salary', 'Female', 'Male', 'Cahul', 'Chisinau', 'Comrat', 'Edinet', 
-                 'Orhei', 'Soroca', 'Stauceni', 'Tiraspol', 'Ungheni', 
-                 'Bonuses and Incentive Programs', 'Casual Dress Code', 'Childcare Assistance', 
-                 'Employee Assistance Programs (EAP)', 'Employee Discounts', 'Employee Recognition Programs', 
-                 'Employee Referral Programs', 'Financial Counseling', 'Flexible Spending Accounts (FSAs)', 
-                 'Flexible Work Arrangements', 'Health Insurance', 'Health and Wellness Facilities', 
-                 'Legal Assistance', 'Life and Disability Insurance', 'Paid Time Off (PTO)', 
-                 'Parental Leave', 'Professional Development', 'Profit-Sharing', 'Relocation Assistance', 
-                 'Retirement Plans', 'Social and Recreational Activities', 'Stock Options or Equity Grants', 
-                 'Transportation Benefits', 'Tuition Reimbursement', 'Wellness Programs', 'Tech_Backend', 'Tech_Frontend', 
-                 'Tech_DevOps_Cloud', 'Tech_Data_AI', 'Mgmt_Project_Agile', 'Mgmt_Strategic_Leadership', 
-                 'Fin_Accounting_Audit', 'Fin_Analysis_Investment', 'Legal_Services', 'Mkt_Digital_SEO', 
-                 'Creative_Design_Art', 'Health_Medical', 'Science_Engineering', 
+required_cols = ['Qualifications', 'Work Type', 'Min_experience', 'Max_experience',
+                 'Salary', 'Female', 'Male', 'Cahul', 'Chisinau', 'Comrat', 'Edinet',
+                 'Orhei', 'Soroca', 'Stauceni', 'Tiraspol', 'Ungheni',
+                 'Bonuses and Incentive Programs', 'Casual Dress Code', 'Childcare Assistance',
+                 'Employee Assistance Programs (EAP)', 'Employee Discounts', 'Employee Recognition Programs',
+                 'Employee Referral Programs', 'Financial Counseling', 'Flexible Spending Accounts (FSAs)',
+                 'Flexible Work Arrangements', 'Health Insurance', 'Health and Wellness Facilities',
+                 'Legal Assistance', 'Life and Disability Insurance', 'Paid Time Off (PTO)',
+                 'Parental Leave', 'Professional Development', 'Profit-Sharing', 'Relocation Assistance',
+                 'Retirement Plans', 'Social and Recreational Activities', 'Stock Options or Equity Grants',
+                 'Transportation Benefits', 'Tuition Reimbursement', 'Wellness Programs', 'Tech_Backend', 'Tech_Frontend',
+                 'Tech_DevOps_Cloud', 'Tech_Data_AI', 'Mgmt_Project_Agile', 'Mgmt_Strategic_Leadership',
+                 'Fin_Accounting_Audit', 'Fin_Analysis_Investment', 'Legal_Services', 'Mkt_Digital_SEO',
+                 'Creative_Design_Art', 'Health_Medical', 'Science_Engineering',
                  'Service_Events', 'Service_Specialized', 'Soft_Skills_Score', 'Cluster', 'Archetype']
 
 # Intiliazation
@@ -170,13 +171,12 @@ def init_files():
 
 init_files()
 
-# ==========================================
-# SIDEBAR
-# ==========================================
+
+# Sidebar with API key and general info
 st.sidebar.title("⚙️ Settings")
 st.sidebar.markdown(
-    "A free OpenRouter API key is **pre-configured** for the CV Architect Chatbot (Tab 3). "
-    "Only input a new key below if the current one stops working."
+    "A free OpenRouter API key is pre-configured for the CV Architect Chatbot (Tab 3). "
+    "**Only** input a new key below if the current one stops working."
 )
 user_api_key = st.sidebar.text_input("OpenRouter API Key (Optional)", type="password", placeholder="sk-or-v1-...")
 
@@ -184,23 +184,23 @@ st.sidebar.title("About A&D Fusion")
 st.sidebar.markdown(
     """We are A&D Fusion, a team dedicated to building a better future for everyone.
     Through this platform, we offer you the opportunity to build a career,
-    whether you are just starting out or already have extensive experience in the field. 
-    Our goal is to reduce unemployment and emigration in the Republic of Moldova by giving every 
-    person the chance to contribute creatively to the development of society and to create a better life 
+    whether you are just starting out or already have extensive experience in the field.
+    Our goal is to reduce unemployment and emigration in the Republic of Moldova by giving every
+    person the chance to contribute creatively to the development of society and to create a better life
     for all its residents. Now is your moment. Get employed and move closer to achieving your dream."""
 
 )
 
-# Main App Tabs
+# Main app tabs
 st.title("📋 Candidate Data Manager")
 tab1, tab2, tab3 = st.tabs(["📝 Form Entry", "📊 Dataset Viewer", "🤖 AI Recommender"])
 
-# Tab 1: Candidate Form
+# Tab 1: Candidate form
 with tab1:
     st.header("Candidate Information Form")
-    
+   
     with st.form("candidate_form", clear_on_submit=True):
-        # 1. Personal Information
+        # Personal information
         st.subheader("1. Personal Information")
         col1, col2 = st.columns(2)
         with col1:
@@ -210,47 +210,46 @@ with tab1:
             gender = st.radio("Gender", ["Female", "Male", "Other / Prefer not to say"], horizontal=True)
             city = st.selectbox("City", CITIES)
             city_selected = city
-            
+           
         st.divider()
-        
-        # 2. Qualifications & Work Type
+       
+        # Qualifications and work type
         st.subheader("2. Qualifications & Work Type")
         col3, col4 = st.columns(2)
         with col3:
             qualifications = st.selectbox("Qualifications Score", options = list(QUALIFICATIONS.keys()))
         with col4:
             work_type = st.selectbox("Work Type", options = list(WORK_TYPES.keys()))
-            
+           
         st.divider()
 
-        # 3. Experience
+        # Experience
         st.subheader("3. Experience")
         experience = st.select_slider("Years of Experience", options=list(EXP_RANGES.keys()))
-        
+       
         st.divider()
 
-        # 4. Skills (Nested styling)
+        # Skills
         st.subheader("4. Skills & Domains")
         st.caption("Check all applicable skills")
         skills_state = {}
-        
-        # Two columns for compact layout of expanders
+       
         exp_col1, exp_col2 = st.columns(2)
         exp_cols = [exp_col1, exp_col2]
-        
+       
         for idx, (domain, subskills) in enumerate(SKILLS_MAP.items()):
             with exp_cols[idx % 2].expander(f"📁 {domain}"):
                 for label, col_name in subskills.items():
                     with st.container(border=True):
                         st.markdown(f"<div class='nested-header'>🔹 {label}</div>", unsafe_allow_html=True)
                         skills_state[col_name] = st.checkbox(f"Add {label} skill", key=col_name)
-        
+       
         st.markdown("<br>", unsafe_allow_html=True)
         soft_skills = st.slider("Soft Skills Score", min_value=0, max_value=5, value=2)
 
         st.divider()
 
-        # 5. Benefits
+        # Benefits
         st.subheader("5. Benefits & Perks")
         benefits_state = {}
         b_cols = st.columns(3)
@@ -261,10 +260,10 @@ with tab1:
         st.subheader("6. Recommendation Settings")
         num_matches = st.slider("Number of jobs to recommend", min_value=1, max_value=10, value=5)
 
-        # 6. Submission
+        # Submission
         st.divider()
         submitted = st.form_submit_button("💾 Submit Profile", use_container_width=True)
-        
+       
         if submitted:
             if not full_name.strip():
                 st.error("Please provide a Full Name.")
@@ -274,22 +273,22 @@ with tab1:
                 if gender == "Female": row["Female"] = 1
                 if gender == "Male": row["Male"] = 1
                 if city in CITIES: row[city] = 1
-                
+               
                 row["Qualifications"] = QUALIFICATIONS[qualifications]
                 row["Work Type"] = WORK_TYPES[work_type]
-                
+               
                 # Midpoint mapping
                 midpoint = EXP_RANGES[experience]
                 row["Min_experience"] = midpoint
                 row["Max_experience"] = midpoint
                 row["Soft_Skills_Score"] = soft_skills
-                
-                # Skills & Benefits
+               
+                # Skills and benefits encoding
                 for col_name, checked in skills_state.items():
                     row[col_name] = 1 if checked else 0
                 for benefit, checked in benefits_state.items():
                     row[benefit] = 1 if checked else 0
-                    
+                   
                 new_df = pd.DataFrame([row])
                 if 'Full name' in new_df:
                     cols_to_drop = ['Balti', 'Full name', 'Age']
@@ -299,7 +298,7 @@ with tab1:
                 existing_df = pd.read_csv(SUB_CSV)
                 updated_df = pd.concat([existing_df, new_df], ignore_index=True)
                 updated_df.to_csv(SUB_CSV, index=False)
-                    
+                   
                 st.success(f"✅ Profile for {full_name} submitted successfully!")
 
                 # Model integration
@@ -309,21 +308,16 @@ with tab1:
            
                     with st.spinner("Analyzing profile and finding the best matches..."):
                         try:
-                            # 1. Align the columns: Ensure the new user DataFrame matches the exact structure of training
-                            # (Assuming your user data is in a DataFrame called 'new_df')
-
-                            # Create a copy so you don't mess up the original form data
                             df_temp = new_df.copy()
 
-                            # Add any missing columns with 0, just like your Colab function
+                            # If missing column, we make it = 0
                             for col in required_cols:
                                 if col not in df_temp.columns:
                                     df_temp[col] = 0
 
-                            # Keep only the exact columns the preprocessor expects, in the correct order
                             df_temp = df_temp[required_cols]
 
-                            # 2. Apply your custom weights
+                            # Applying custom weights to some columns
                             for col in tech_cols:
                                 df_temp[col] = df_temp[col] * 20.0
 
@@ -332,14 +326,14 @@ with tab1:
                             for col in benefit_cols:
                                 df_temp[col] = df_temp[col] * 0.5
 
-                            # --- THE PREDICTION BLOCK ---
-                            # 3. Transform the 57 columns down to the 21 features
+                            # The prediction block:
                             X_new_processed = preprocessor.transform(df_temp)
 
-
-                            # 5. Fetch the actual job details
                             df_jobs = pd.read_csv(MAIN_CSV)
 
+                            # We apply an amount we want to search through(in our case
+                            # we chose 300 so that we could have enough jobs to recommend
+                            # a certain city
                             total_possible = len(df_jobs)
                             search_k = min(300, total_possible)
 
@@ -348,19 +342,20 @@ with tab1:
                             recommendations_pool = df_jobs.iloc[indices[0]].copy()
                             recommendations_pool['distance'] = distances[0]
 
-                            # 5. Aplicăm FILTRAREA HARD pe oraș
-                            # Aici forțăm orașul ales de utilizator în interfață
+                            # City filtering (why we searched 300 earlier)
                             results = recommendations_pool[recommendations_pool['City'] == city_selected].head(num_matches)
 
-                            # 6. Display results
+                            # Results
                             for i, (idx, row) in enumerate(results.iterrows()):
                                 raw_dist = distances[0][i]
-                                
-                                #Strictness formula
+                               
+                                # Strictness formula so that scores won't be suspiciously
+                                # high (due to the cosinus method used in the training of
+                                # the model) or super similar due to our dataset
                                 strictness = 1.5
                                 realistic_score = np.exp(-strictness * raw_dist) * 100
                                 if realistic_score > 99.9: realistic_score = 99.9
-                                
+                               
                                 # Output UI
                                 st.info(
                                     f"**[{i+1}] {row.get('Job Title', 'Unknown Job')}**  \n"
@@ -378,26 +373,26 @@ with tab1:
 
 
 
-# Tab 2: Dataset Viewer
+# Tab 2: Dataset viewer
 with tab2:
     st.header("Dataset Viewer")
-    
-    # Load Main Dataset
+   
+    # Loading main dataset
     try:
         df_main = pd.read_csv(MAIN_CSV)
     except Exception as e:
         df_main = pd.DataFrame(columns=get_all_columns())
-        
+       
     search_query = st.text_input("🔍 Search across all columns (case-insensitive)", placeholder="Type a name, city, skill, etc...")
-    
-    # Filter Logic
+   
+    # Filtering logic
     if search_query:
         mask = df_main.astype(str).apply(lambda x: x.str.contains(search_query, case=False, na=False)).any(axis=1)
         filtered_df = df_main[mask]
     else:
         filtered_df = df_main
 
-    # Metrics and Download
+    # Metrics and download
     colA, colB = st.columns([1, 4])
     with colA:
         st.metric("Total Rows", len(filtered_df))
@@ -414,16 +409,13 @@ with tab2:
     st.dataframe(filtered_df, use_container_width=True, hide_index=True)
 
 
-# ==========================================
-# TAB 3: AI Recommender Chatbot (A&D Fusion Career Architect)
-# ==========================================
+# Tab 3: AI recommender chatbot
 with tab3:
     st.header("🤖 A&D Fusion Career Architect")
     st.markdown("Paste your CV below, and our AI will analyze it against our curated Moldova job dataset to suggest high-impact profile improvements.")
-    
+   
     target_city = st.selectbox("📍 Target City for Localized Advice:", CITIES)
-    
-    # Changed from CSV input to CV text input
+   
     cv_text = st.text_area("📄 Paste your CV here:", height=250, placeholder="Experience: \n- Worked at X for 3 years...\n\nSkills: \n- Python, Excel, Management...")
     analyze_btn = st.button("🧠 Analyze CV", type="primary")
 
@@ -440,22 +432,22 @@ with tab3:
                         st.error(f"Could not load data_for_api.csv. Ensure the file is in the correct directory. Error: {e}")
                         sample_data = "DATA NOT FOUND"
 
-                    # 2. Determine which API Key to use
+                    # Which key to use
                     default_key = "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"
                     active_key = user_api_key if user_api_key.strip() else default_key
 
-                    # 3. Setup OpenRouter Client
+                    # The openrouter client setup
                     from openai import OpenAI
                     client = OpenAI(
                         base_url="https://openrouter.ai/api/v1",
                         api_key=active_key,
                         default_headers={
-                            "HTTP-Referer": "http://localhost:8501", # Default Streamlit port
-                            "X-Title": "A&D Fusion App", 
+                            "HTTP-Referer": "http://localhost:8501",
+                            "X-Title": "A&D Fusion App",
                         }
                     )
 
-                    # 4. Create the System Prompt
+                    # System prompt
                     system_instructions = f"""
                     You are the "A&D Fusion Career Architect." You are working with a curated dataset of 5,000 premium job market entries in Moldova.
 
@@ -472,34 +464,33 @@ with tab3:
                     4. LIMITATIONS: If the user's career path isn't represented in these 5,000 rows, honestly state: "Based on our current high-density market subset, we don't have a direct match, but here is the closest strategic advice."
                     """
 
-                    # 5. Execute the Call
+                    # Executing the call
                     response = client.chat.completions.create(
-                        model="openrouter/owl-alpha", # Or another model if this one is offline
+                        model="openrouter/owl-alpha",
                         messages=[
                             {"role": "system", "content": system_instructions},
                             {"role": "user", "content": f"Here is my CV:\n{cv_text}"}
                         ],
-                        temperature=0.4
+                        temperature=0.4 #Good for data extraction
                     )
 
                     if response and response.choices:
                         result_text = response.choices[0].message.content
                         st.success("CV Audit Complete!")
-    
-                      # Am adăugat color:#ffffff (alb) și un font-size mai clar
+                        #Respone UI design
                         st.markdown(
                             f"""
                             <div style="
-                            background-color: #262730; 
-                            color: #ffffff; 
-                            padding: 25px; 
-                            border-radius: 10px; 
+                            background-color: #262730;
+                            color: #ffffff;
+                            padding: 25px;
+                            border-radius: 10px;
                             border: 1px solid #464b5d;
                             line-height: 1.6;
                             ">
                             {result_text}
                             </div>
-                            """, 
+                            """,
                             unsafe_allow_html=True
                     )
                     else:
