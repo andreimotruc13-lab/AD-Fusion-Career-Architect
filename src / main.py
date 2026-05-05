@@ -120,6 +120,8 @@ QUALIFICATIONS = {
     'Doctorate': 5
 }
 
+LENGTHS = ['Short And Concise', 'Medium', 'Long And Detailed']
+
 # Lists of columns we need for the model to work
 tech_cols = ['Tech_Backend', 'Tech_Frontend', 'Tech_DevOps_Cloud',
             'Tech_Data_AI', 'Mgmt_Project_Agile', 'Mgmt_Strategic_Leadership',
@@ -175,10 +177,9 @@ init_files()
 # Sidebar with API key and general info
 st.sidebar.title("⚙️ Settings")
 st.sidebar.markdown(
-    "A free OpenRouter API key is pre-configured for the CV Architect Chatbot (Tab 3). "
-    "**Only** input a new key below if the current one stops working."
+    "Please paste in an OpenRouter free API key for the CV architect model (Tab 3)"
 )
-user_api_key = st.sidebar.text_input("OpenRouter API Key (Optional)", type="password", placeholder="sk-or-v1-...")
+user_api_key = st.sidebar.text_input("OpenRouter API Key", type="password", placeholder="sk-or-v1-...")
 
 st.sidebar.title("About A&D Fusion")
 st.sidebar.markdown(
@@ -245,7 +246,7 @@ with tab1:
                         skills_state[col_name] = st.checkbox(f"Add {label} skill", key=col_name)
        
         st.markdown("<br>", unsafe_allow_html=True)
-        soft_skills = st.slider("Soft Skills Score", min_value=0, max_value=5, value=2)
+        soft_skills = st.slider("Soft Skills Score", min_value=0, max_value=3, value=1)
 
         st.divider()
 
@@ -415,6 +416,7 @@ with tab3:
     st.markdown("Paste your CV below, and our AI will analyze it against our curated Moldova job dataset to suggest high-impact profile improvements.")
    
     target_city = st.selectbox("📍 Target City for Localized Advice:", CITIES)
+    length_of_response = st.selectbox("Preferred length of response:", LENGTHS)
    
     cv_text = st.text_area("📄 Paste your CV here:", height=250, placeholder="Experience: \n- Worked at X for 3 years...\n\nSkills: \n- Python, Excel, Management...")
     analyze_btn = st.button("🧠 Analyze CV", type="primary")
@@ -432,14 +434,14 @@ with tab3:
                         st.error(f"Could not load data_for_api.csv. Ensure the file is in the correct directory. Error: {e}")
                         sample_data = "DATA NOT FOUND"
 
-                    # Which key to use
-                    default_key = "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"
-                    active_key = user_api_key if user_api_key.strip() else default_key
+                    if user_api_key.strip():
+                        active_key = user_api_key
 
                     # The openrouter client setup
                     from openai import OpenAI
                     client = OpenAI(
                         base_url="https://openrouter.ai/api/v1",
+                        timeout=300.0,
                         api_key=active_key,
                         default_headers={
                             "HTTP-Referer": "http://localhost:8501",
@@ -449,19 +451,21 @@ with tab3:
 
                     # System prompt
                     system_instructions = f"""
-                    You are the "A&D Fusion Career Architect." You are working with a curated dataset of 5,000 premium job market entries in Moldova.
+                    You are the "A&D Fusion Career Architect." You are working with a curated dataset of 5000 premium job market entries in Moldova.
 
                     --- START OF DATA ---
                     {sample_data}
                     --- END OF DATA ---
 
-                    1. PRECISION: Since we are using a curated subset of 5,000 entries, treat these as the definitive benchmarks for 'Salary Range' and 'Skills'.
+                    1. PRECISION: Since we are using a curated subset of 5000 entries, treat these as the definitive benchmarks for 'Salary Range' and 'Skills'.
                     2. CV UPGRADE: If a user provides a CV, perform a "Deep Audit":
                        - Find the closest 2-3 roles in the provided data.
                        - Use the 'skills' and 'Experience' from those roles to suggest 2 or more(depending on the CV) high-impact additions to the user's CV.
                        - Rewrite a section of their CV using the STAR method (Action -> Result).
                     3. THE CITY CONTEXT: The user is looking for roles in {target_city}. Use the 'City' data to ensure the advice is localized to this specific market.
                     4. LIMITATIONS: If the user's career path isn't represented in these 5,000 rows, honestly state: "Based on our current high-density market subset, we don't have a direct match, but here is the closest strategic advice."
+                    5. LENGTH OF OUTPUT: Make sure that the length of what you give the user is: {length_of_response}
+                    6. IMPORTANT: Keep in mind that the user will only be able to input something once, so do not ask follow-up questions and make sure to clarify all possible questions in 1 message
                     """
 
                     # Executing the call
