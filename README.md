@@ -13,27 +13,22 @@ We chose TruncatedSVD with 15 components and a technical weight of 20 to priorit
 A&D Fusion description in website and the place when the users can put their API keys:
 <img width="248" height="883" alt="Screenshot 2026-05-05 153153" src="https://github.com/user-attachments/assets/67d74e81-2e2c-435a-9ded-8afb31c6a9e6" />
 
-"This initial section of the platform allows users to input their professional preferences, skills, and desired benefits. The collected data serves as the foundation for the AI engine to filter and generate personalized career recommendations. By structuring these user attributes, the system ensures high-accuracy matching between candidates and potential opportunities."
+"This initial section of the platform allows users to input their professional preferences, skills, and desired benefits. The collected data serves as the foundation for the AI engine to filter and generate personalized career recommendations. By structuring these user attributes, the system ensures high-accuracy matching between candidates and potential opportunities:
 <img width="1919" height="907" alt="Screenshot 2026-05-04 231613" src="https://github.com/user-attachments/assets/62e51da7-137c-49b7-8ee0-513b4cff3104" />
 <img width="1910" height="895" alt="Screenshot 2026-05-04 234209" src="https://github.com/user-attachments/assets/d890ce83-b2e7-43da-b058-0ab392c42cb1" />
 <img width="1917" height="899" alt="image" src="https://github.com/user-attachments/assets/f47a6413-c4aa-4014-bcc8-5cbf3152647b" />
 
-This section serves as the primary dataset containing structured information on skills and domains. The AI engine processes these specific data points to identify patterns and ensure an accurate match between the user's profile and the most relevant opportunities.
+This section serves as the primary dataset containing structured information on skills and domains. The AI engine processes these specific data points to identify patterns and ensure an accurate match between the user's profile and the most relevant opportunities:
 <img width="1644" height="905" alt="Screenshot 2026-05-05 153311" src="https://github.com/user-attachments/assets/b44e3ef7-a81d-4726-8efc-e6b479343d00" />
 
-This final page allows users to input their CV as text, enabling the AI to analyze their professional background in depth. The system then generates tailored job matches and provides actionable recommendations for future career improvements. By comparing the CV against market demands, the AI offers a strategic roadmap for professional growth
+This final page allows users to input their CV as text, enabling the AI to analyze their professional background in depth. The system then generates tailored job matches and provides actionable recommendations for future career improvements. By comparing the CV against market demands, the AI offers a strategic roadmap for professional growth:
 <img width="1549" height="862" alt="Screenshot 2026-05-05 213149" src="https://github.com/user-attachments/assets/2f72a3ce-b5d9-4e35-acdd-7f8bc55d2eda" />
 <img width="1849" height="894" alt="Screenshot 2026-05-05 213136" src="https://github.com/user-attachments/assets/e5515cc9-c208-4a4a-b087-b06be7077efa" />
 <img width="1910" height="906" alt="Screenshot 2026-05-05 213117" src="https://github.com/user-attachments/assets/9889a627-2888-4dca-ac71-b366fd6beaf7" />
 
-This section displays the personalized results generated from the user's initial inputs, including their skills, experience, and professional preferences. The AI processes these specific attributes to rank and present the most compatible job opportunities with high precision. Additionally, users have the flexibility to customize the output by selecting exactly how many top results they wish to view.
+This section displays the personalized results generated from the user's initial inputs, including their skills, experience, and professional preferences. The AI processes these specific attributes to rank and present the most compatible job opportunities with high precision. Additionally, users have the flexibility to customize the output by selecting exactly how many top results they wish to view:
 <img width="1468" height="838" alt="Screenshot 2026-05-05 153431" src="https://github.com/user-attachments/assets/e91a633c-9ecc-4ea6-bf48-62281608a0dd" />
 <img width="1453" height="836" alt="Screenshot 2026-05-05 153800" src="https://github.com/user-attachments/assets/94b5d874-7095-402f-b1d2-090e879fb9f2" />
-
-
-
-
-
 
 
 
