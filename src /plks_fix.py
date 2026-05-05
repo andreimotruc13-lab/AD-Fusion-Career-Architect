@@ -11,7 +11,7 @@ ct._RemainderColsList = _RemainderColsList
 try:
     recommender = joblib.load("recommender_fixed.pkl")
     preprocessor = joblib.load("preprocessor_fixed.pkl")
-    print("✅ Files loaded successfully using the patch!")
+    print("Files loaded successfully using the patch")
 
     joblib.dump(recommender, "recommender_fixed.pkl")
     joblib.dump(preprocessor, "preprocessor_fixed.pkl")
