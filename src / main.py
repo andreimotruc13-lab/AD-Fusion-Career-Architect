@@ -32,8 +32,9 @@ from sklearn.preprocessing import StandardScaler
 @st.cache_resource
 def load_ml_models():
     base_path = os.path.dirname(__file__)
-    model_path = os.path.join(base_path, "recommender_fixed.pkl")
-    prep_path = os.path.join(base_path, "preprocessor_fixed.pkl")
+    
+    model_path = os.path.join(base_path, "..", "models", "recommender_fixed.pkl")
+    prep_path = os.path.join(base_path, "..", "models", "preprocessor_fixed.pkl")
    
     try:
         if not os.path.exists(model_path) or not os.path.exists(prep_path):
