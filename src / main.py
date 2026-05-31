@@ -341,7 +341,17 @@ with tab1:
                             # we chose 300 so that we could have enough jobs to recommend
                             # a certain city
                             total_possible = len(df_jobs)
-                            search_k = min(300, total_possible)
+                            if total_possible == 0:
+                                st.error(f"⚠️ The dataset file '{MAIN_CSV}' is currently empty. Please ensure it has job entries.")
+                            else:
+                                search_k = min(300, total_possible)
+                                distances, indices = recommender.kneighbors(X_new_processed, n_neighbors=search_k)
+
+                                recommendations_pool = df_jobs.iloc[indices[0]].copy()
+                                recommendations_pool['distance'] = distances[0]
+
+                                # City filtering 
+                                results = recommendations_pool[recommendations_pool['City'] == city_selected].head(num_matches)
 
                             distances, indices = recommender.kneighbors(X_new_processed, n_neighbors=search_k)
 
