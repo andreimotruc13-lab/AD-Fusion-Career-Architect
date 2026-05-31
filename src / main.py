@@ -175,11 +175,15 @@ init_files()
 
 
 # Sidebar with API key and general info
+st.sidebar.markdown(
+    """Note: Job locations and salaries are deterministic simulations,
+    adapting a global dataset to reflect the Moldovan market context for demonstration purposes."""
+)
 st.sidebar.title("⚙️ Settings")
 st.sidebar.markdown(
     "Please paste in an OpenRouter free API key for the CV architect model (Tab 3)"
 )
-user_api_key = st.sidebar.text_input("OpenRouter API Key", type="password", placeholder="sk-or-v1-...")
+# user_api_key = st.sidebar.text_input("OpenRouter API Key", type="password", placeholder="sk-or-v1-...")
 
 st.sidebar.title("About A&D Fusion")
 st.sidebar.markdown(
@@ -434,8 +438,7 @@ with tab3:
                         st.error(f"Could not load data_for_api.csv. Ensure the file is in the correct directory. Error: {e}")
                         sample_data = "DATA NOT FOUND"
 
-                    if user_api_key.strip():
-                        active_key = user_api_key
+                    active_key = st.secrets["OPENROUTER_API_KEY"]
 
                     # The openrouter client setup
                     from openai import OpenAI
