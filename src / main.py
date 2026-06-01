@@ -72,7 +72,7 @@ def load_ml_models():
     except Exception as e:
         return None, None, None, None, str(e)
 
-recommender, preprocessor, ml_status = load_ml_models()
+recommender_fixed, preprocessor_fixed, recommender_text, tfidf_vectorizer, ml_status = load_ml_models()
 ml_loaded = (ml_status is True)
 
 
