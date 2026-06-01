@@ -8,7 +8,6 @@ if 'main' not in sys.modules:
 else:
     main_module = sys.modules['main']
 
-# Possibly create a fallback dummy
 try:
     from sklearn.compose._column_transformer import _RemainderColsList
     main_module._RemainderColsList = _RemainderColsList
@@ -35,11 +34,11 @@ import requests
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Loading models securizat prin descărcare directă
 @st.cache_resource
-def load_ml_models2():
+@st.cache_resource
+def load_ml_models():
     import sys
     import types
     
-
     try:
         from sklearn.compose._column_transformer import _RemainderColsList
     except ImportError:
@@ -66,61 +65,26 @@ def load_ml_models2():
     }
     
     try:
-        # Descărcare recommender_fixed.pkl
         if not os.path.exists(rec_fixed_path) or os.path.getsize(rec_fixed_path) == 0:
-            with st.spinner("Se descarcă recommender_fixed.pkl de backup..."):
-                r = requests.get(urls["recommender_fixed.pkl"], stream=True)
-                if r.status_code == 200:
-                    with open(rec_fixed_path, 'wb') as f:
-                        f.write(r.content)
-                else:
-                    return None, None, f"Fișierul local lipsește și descărcarea a eșuat: {r.status_code}"
+            r = requests.get(urls["recommender_fixed.pkl"], stream=True)
+            if r.status_code == 200:
+                with open(rec_fixed_path, 'wb') as f:
+                    f.write(r.content)
         
-        # Descărcare preprocessor_fixed.pkl
         if not os.path.exists(prep_fixed_path) or os.path.getsize(prep_fixed_path) == 0:
-            with st.spinner("Se descarcă preprocessor_fixed.pkl de backup..."):
-                r = requests.get(urls["preprocessor_fixed.pkl"], stream=True)
-                if r.status_code == 200:
-                    with open(prep_fixed_path, 'wb') as f:
-                        f.write(r.content)
-                else:
-                    return None, None, f"Fișierul local lipsește și descărcarea a eșuat: {r.status_code}"
-                    
-        # Descărcare automată pentru dataset_min_main.csv
-        dataset_path = os.path.join(BASE_DIR, "dataset_min_main.csv")
-        if not os.path.exists(dataset_path) or os.path.getsize(dataset_path) == 0:
-            with st.spinner("Se descarcă dataset_min_main.csv de backup..."):
-                r = requests.get("https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/dataset_min_main.csv")
-                if r.status_code == 200:
-                    with open(dataset_path, 'wb') as f:
-                        f.write(r.content)
-
-        # Descărcare automată pentru data_for_api.csv
-        api_data_path = os.path.join(BASE_DIR, "data_for_api.csv")
-        if not os.path.exists(api_data_path) or os.path.getsize(api_data_path) == 0:
-            with st.spinner("Se descarcă data_for_api.csv de backup..."):
-                r = requests.get("https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/data_for_api.csv")
-                if r.status_code == 200:
-                    with open(api_data_path, 'wb') as f:
-                        f.write(r.content)
+            r = requests.get(urls["preprocessor_fixed.pkl"], stream=True)
+            if r.status_code == 200:
+                with open(prep_fixed_path, 'wb') as f:
+                    f.write(r.content)
         
-        # 3. Încărcarea efectivă a modelelor în variabilele tale originale
-        try:
-            recommender = joblib.load(rec_fixed_path)
-        except Exception as e:
-            return None, None, f"Eroare la citirea [recommender_fixed.pkl]: {str(e)}"
-            
-        try:
-            preprocessor = joblib.load(prep_fixed_path)
-        except Exception as e:
-            return None, None, f"Eroare la citirea [preprocessor_fixed.pkl]: {str(e)}"
-        
+        recommender = joblib.load(rec_fixed_path)
+        preprocessor = joblib.load(prep_fixed_path)
         return recommender, preprocessor, True
-        
     except Exception as e:
-        return None, None, f"Eroare generală: {str(e)}"
-        
-recommender, preprocessor, ml_status = load_ml_models2()
+        return None, None, f"Eroare la incarcare modele: {str(e)}"
+
+recommender, preprocessor, ml_status = load_ml_models()
+ml_loaded = (ml_status is True)
 
 # ml_status va fi True 
 ml_loaded = (ml_status is True)
@@ -410,19 +374,24 @@ with tab1:
                             for col in benefit_cols:
                                 df_temp[col] = df_temp[col] * 0.5
 
+                    
                             # The prediction block:
                             X_new_processed = preprocessor.transform(df_temp)
 
-                            df_jobs = pd.read_csv(MAIN_CSV)
+                            url_dataset = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/dataset_min_main.csv"
+                            try:
+                                df_jobs = pd.read_csv(url_dataset)
+                            except Exception as e:
+                                # Fallback în caz că pică request-ul de rețea
+                                df_jobs = pd.read_csv(MAIN_CSV)
 
-                            # We apply an amount we want to search through(in our case
-                            # we chose 300 so that we could have enough jobs to recommend
-                            # a certain city
                             total_possible = len(df_jobs)
                             if total_possible == 0:
-                                st.error(f"⚠️ The dataset file '{MAIN_CSV}' is currently empty. Please ensure it has job entries.")
+                                st.error(f"⚠️ The dataset is currently empty. Direct download failed.")
+                                search_k = 0
                             else:
                                 search_k = min(300, total_possible)
+                                
                                 distances, indices = recommender.kneighbors(X_new_processed, n_neighbors=search_k)
 
                                 recommendations_pool = df_jobs.iloc[indices[0]].copy()
