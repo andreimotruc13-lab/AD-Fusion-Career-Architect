@@ -1,6 +1,5 @@
 import sys
 import sklearn.compose._column_transformer
-import requests
 
 # Defining missing class(we were getting errors without this chunk of code)
 class _RemainderColsList(list):
@@ -32,7 +31,8 @@ from sklearn.preprocessing import StandardScaler
 # Loading models
 @st.cache_resource
 def load_ml_models():
-    # 1. LINK-URILE pentru fisierele mari
+    import requests
+    # 1. Linkuri pentru fisierele mari
     rec_text_url = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/recommender_text.pkl"
     tfidf_url = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/tfidf_vectorizer.pkl"
     
