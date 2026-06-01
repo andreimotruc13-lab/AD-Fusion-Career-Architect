@@ -10,6 +10,16 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
 import requests
 
+
+ml_loaded = False
+
+try:
+    ml_loaded = True
+except Exception as e:
+    import streamlit as st
+    st.error(f"Modelul nu s-a putut încărca: {e}")
+    ml_loaded = False
+    
 # detectam calea catre folder
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Loading models securizat prin descărcare directă
