@@ -36,7 +36,20 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Loading models securizat prin descărcare directă
 @st.cache_resource
 def load_ml_models():
+    import sys
+    import types
+    
+    try:
+        from sklearn.compose._column_transformer import _RemainderColsList
+    except ImportError:
+        class _RemainderColsList(list):
+            pass
 
+    for mod_name in ['main', '__main__', __name__]:
+        if mod_name not in sys.modules:
+            sys.modules[mod_name] = types.ModuleType(mod_name)
+        setattr(sys.modules[mod_name], '_RemainderColsList', _RemainderColsList)
+        
     if os.path.exists(os.path.join(BASE_DIR, "models")):
         MODELS_DIR = os.path.join(BASE_DIR, "models")
     else:
