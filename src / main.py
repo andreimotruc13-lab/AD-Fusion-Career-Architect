@@ -1,22 +1,3 @@
-import sys
-import sklearn.compose._column_transformer
-
-# Defining missing class(we were getting errors without this chunk of code)
-class _RemainderColsList(list):
-    pass
-
-# Putting it into the library it was intended to go
-sklearn.compose._column_transformer._RemainderColsList = _RemainderColsList
-
-# Putting it into the 'main' module
-import types
-main_module = types.ModuleType('main')
-main_module._RemainderColsList = _RemainderColsList
-sys.modules['main'] = main_module
-
-# We also injected it into the current context module
-sys.modules['__main__']._RemainderColsList = _RemainderColsList
-
 import streamlit as st
 import pandas as pd
 import os
@@ -27,30 +8,26 @@ import sklearn
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
+import requests
 
-# Loading models
-@st.cache_resource
+# Loading models securizat prin descărcare directă
 @st.cache_resource
 def load_ml_models():
-    import requests
-    import os
-    
-    # Găsește automat folderul exact unde stă main.py (adică folderul 'src')
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    
-    # Căile absolute și sigure pentru fișierele MICI (aflate pe GitHub)
-    rec_fixed_path = os.path.join(BASE_DIR, "recommender_fixed.pkl")
-    prep_fixed_path = os.path.join(BASE_DIR, "preprocessor_fixed.pkl")
-    
-    # Căile absolute și sigure unde se vor descărca fișierele MARI (tot în 'src')
-    rec_text_path = os.path.join(BASE_DIR, "recommender_text.pkl")
-    tfidf_path = os.path.join(BASE_DIR, "tfidf_vectorizer.pkl")
-    
-    # Link-urile directoare de pe Hugging Face pentru fișierele MARI
+    # 1. LINK-URILE DIRECTE de pe Hugging Face pentru fișierele MARI
+    # (Înlocuiește AndrIIII7 și career-architect cu numele tău de utilizator și numele Space-ului dacă diferă)
     rec_text_url = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/recommender_text.pkl"
     tfidf_url = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/tfidf_vectorizer.pkl"
     
+    # Căile locale unde se vor salva fișierele mari după descărcare
+    rec_text_path = "recommender_text.pkl"
+    tfidf_path = "tfidf_vectorizer.pkl"
+    
+    # Căile fișierelor MICI care se află deja pe GitHub în același folder cu scriptul
+    rec_fixed_path = "recommender_fixed.pkl"
+    prep_fixed_path = "preprocessor_fixed.pkl"
+    
     try:
+        # ---- DESCĂRCARE MODELE MARI DE PE HUGGING FACE ----
         # Descarcă recommender_text.pkl dacă nu există local
         if not os.path.exists(rec_text_path):
             with st.spinner("Se descarcă modelul text de pe Hugging Face..."):
@@ -67,14 +44,19 @@ def load_ml_models():
                     for chunk in r.iter_content(chunk_size=1024*1024):
                         if chunk: f.write(chunk)
            
-        # Încărcare în memorie folosind căile dinamice sigure
+        # ---- ÎNCĂRCARE TOATE MODELELE ÎN MEMORIE ----
+        # Încărcăm modelele mari (descărcate de pe HF)
         recommender_text = joblib.load(rec_text_path)
         tfidf_vectorizer = joblib.load(tfidf_path)
+        
+        # Încărcăm modelele mici (luate direct de pe GitHub)
         recommender_fixed = joblib.load(rec_fixed_path)
         preprocessor_fixed = joblib.load(prep_fixed_path)
         
+        # Returnează-le exact în ordinea în care le folosești tu în restul scriptului
         return recommender_fixed, preprocessor_fixed, recommender_text, tfidf_vectorizer, True
     except Exception as e:
+        # În caz de eroare returnăm None și textul erorii
         return None, None, None, None, str(e)
 
 recommender_fixed, preprocessor_fixed, recommender_text, tfidf_vectorizer, ml_status = load_ml_models()
