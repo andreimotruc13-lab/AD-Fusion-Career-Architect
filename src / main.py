@@ -14,68 +14,71 @@ import requests
 @st.cache_resource
 from huggingface_hub import hf_hub_download
 
+# detectam calea catre folder
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Loading models securizat prin descărcare directă
 @st.cache_resource
 def load_ml_models():
-    # Căile fișierelor MICI care se află deja pe GitHub în același folder cu scriptul
-    rec_fixed_path = "recommender_fixed.pkl"
-    prep_fixed_path = "preprocessor_fixed.pkl"
+    # Căile locale absolute către fișierele mici din folderul src
+    rec_fixed_path = os.path.join(BASE_DIR, "recommender_fixed.pkl")
+    prep_fixed_path = os.path.join(BASE_DIR, "preprocessor_fixed.pkl")
+    
+    # Locul unde se vor descărca și salva fișierele mari în folderul src
+    rec_text_path = os.path.join(BASE_DIR, "recommender_text.pkl")
+    tfidf_path = os.path.join(BASE_DIR, "tfidf_vectorizer.pkl")
+    
+    # URL-urile de tip 'resolve' care descarcă fișierul binar complet (Rezolvă definitiv eroarea 69)
+    urls = {
+        "recommender_text.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/recommender_text.pkl",
+        "tfidf_vectorizer.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/tfidf_vectorizer.pkl"
+    }
     
     try:
-
-        with st.spinner("Se descarcă modelul text de pe Hugging Face..."):
-            rec_text_path = hf_hub_download(
-                repo_id="AndrIIII7/career-architect",
-                filename="src/recommender_text.pkl",
-                repo_type="space"
-            )
-                        
-        with st.spinner("Se descarcă vectorizatorul TF-IDF de pe Hugging Face..."):
-            tfidf_path = hf_hub_download(
-                repo_id="AndrIIII7/career-architect",
-                filename="src/tfidf_vectorizer.pkl",
-                repo_type="space"
-            )
-    
+        # 1. Descărcare recommender_text.pkl dacă nu există local
+        if not os.path.exists(rec_text_path):
+            with st.spinner("Se descarcă recommender_text.pkl de pe Hugging Face..."):
+                r = requests.get(urls["recommender_text.pkl"], stream=True)
+                if r.status_code == 200:
+                    with open(rec_text_path, 'wb') as f:
+                        f.write(r.content)
+                else:
+                    return None, None, None, None, f"Eroare la descărcare recommender_text (Cod HTTP: {r.status_code})"
+        
+        # 2. Descărcare tfidf_vectorizer.pkl dacă nu există local
+        if not os.path.exists(tfidf_path):
+            with st.spinner("Se descarcă tfidf_vectorizer.pkl de pe Hugging Face..."):
+                r = requests.get(urls["tfidf_vectorizer.pkl"], stream=True)
+                if r.status_code == 200:
+                    with open(tfidf_path, 'wb') as f:
+                        f.write(r.content)
+                else:
+                    return None, None, None, None, f"Eroare la descărcare tfidf_vectorizer (Cod HTTP: {r.status_code})"
+        
+        # 3. Încărcarea propriu-zisă a modelelor cu verificări individuale
         try:
             recommender_text = joblib.load(rec_text_path)
         except Exception as e:
-            return None, None, None, None, f"Eroare la [recommender_text.pkl]: {str(e)}"
-
+            return None, None, None, None, f"Eroare la citirea [recommender_text.pkl]: {str(e)}"
+            
         try:
             tfidf_vectorizer = joblib.load(tfidf_path)
         except Exception as e:
-            return None, None, None, None, f"Eroare la [tfidf_vectorizer.pkl]: {str(e)}"
-
+            return None, None, None, None, f"Eroare la citirea [tfidf_vectorizer.pkl]: {str(e)}"
+            
         try:
             recommender_fixed = joblib.load(rec_fixed_path)
         except Exception as e:
-            return None, None, None, None, f"Eroare la [recommender_fixed.pkl]: {str(e)}"
-
+            return None, None, None, None, f"Eroare la citirea [recommender_fixed.pkl]: {str(e)}"
+            
         try:
             preprocessor_fixed = joblib.load(prep_fixed_path)
         except Exception as e:
-            return None, None, None, None, f"Eroare la [preprocessor_fixed.pkl]: {str(e)}"
-        
+            return None, None, None, None, f"Eroare la citirea [preprocessor_fixed.pkl]: {str(e)}"
+            
         return recommender_fixed, preprocessor_fixed, recommender_text, tfidf_vectorizer, True
         
     except Exception as e:
-        return None, None, None, None, f"Eroare generală la descărcare de pe HF Hub: {str(e)}"
-
-        try:
-            recommender_fixed = joblib.load(rec_fixed_path)
-        except Exception as e:
-            return None, None, None, None, f"Eroare la [recommender_fixed.pkl]: {str(e)}"
-
-        try:
-            preprocessor_fixed = joblib.load(prep_fixed_path)
-        except Exception as e:
-            return None, None, None, None, f"Eroare la [preprocessor_fixed.pkl]: {str(e)}"
-        
-        return recommender_fixed, preprocessor_fixed, recommender_text, tfidf_vectorizer, True
-        
-    except Exception as e:
-        return None, None, None, None, f"Eroare generală la descărcare: {str(e)}"
+        return None, None, None, None, f"Eroare generală în load_ml_models: {str(e)}"
 
 recommender_fixed, preprocessor_fixed, recommender_text, tfidf_vectorizer, ml_status = load_ml_models()
 ml_loaded = (ml_status is True)
