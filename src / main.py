@@ -35,7 +35,7 @@ import requests
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Loading models securizat prin descărcare directă
 @st.cache_resource
-def load_ml_models():
+def load_ml_models2():
     import sys
     import types
     
@@ -120,7 +120,7 @@ def load_ml_models():
     except Exception as e:
         return None, None, f"Eroare generală: {str(e)}"
         
-recommender, preprocessor, ml_status = load_ml_models()
+recommender, preprocessor, ml_status = load_ml_models2()
 
 # ml_status va fi True 
 ml_loaded = (ml_status is True)
