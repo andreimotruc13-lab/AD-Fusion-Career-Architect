@@ -1,5 +1,6 @@
 import sys
 import sklearn.compose._column_transformer
+import requests
 
 # Defining missing class(we were getting errors without this chunk of code)
 class _RemainderColsList(list):
