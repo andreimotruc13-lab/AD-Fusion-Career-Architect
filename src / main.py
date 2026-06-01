@@ -39,6 +39,7 @@ def load_ml_models():
     import sys
     import types
     
+
     try:
         from sklearn.compose._column_transformer import _RemainderColsList
     except ImportError:
@@ -49,45 +50,43 @@ def load_ml_models():
         if mod_name not in sys.modules:
             sys.modules[mod_name] = types.ModuleType(mod_name)
         setattr(sys.modules[mod_name], '_RemainderColsList', _RemainderColsList)
-        
+
     if os.path.exists(os.path.join(BASE_DIR, "models")):
         MODELS_DIR = os.path.join(BASE_DIR, "models")
     else:
         MODELS_DIR = os.path.join(os.path.dirname(BASE_DIR), "models")
+    os.makedirs(MODELS_DIR, exist_ok=True)
         
-    # 2. Setăm căile exacte către fișiere
     rec_fixed_path = os.path.join(MODELS_DIR, "recommender_fixed.pkl")
     prep_fixed_path = os.path.join(MODELS_DIR, "preprocessor_fixed.pkl")
     
-    # URL-uri de backup
     urls = {
         "recommender_fixed.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/recommender_text.pkl",
-        "preprocessor_fixed.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/tfidf_vectorizer.pkl"
+        "preprocessor_fixed.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/preprocessor_text.pkl"
     }
     
     try:
-        # Pasul de siguranță: Dacă cumva fișierele nu există local, încearcă să le descarce
-        if not os.path.exists(rec_fixed_path):
+        # Descărcare recommender_fixed.pkl
+        if not os.path.exists(rec_fixed_path) or os.path.getsize(rec_fixed_path) == 0:
             with st.spinner("Se descarcă recommender_fixed.pkl de backup..."):
                 r = requests.get(urls["recommender_fixed.pkl"], stream=True)
                 if r.status_code == 200:
-                    os.makedirs(MODELS_DIR, exist_ok=True)
                     with open(rec_fixed_path, 'wb') as f:
                         f.write(r.content)
                 else:
                     return None, None, f"Fișierul local lipsește și descărcarea a eșuat: {r.status_code}"
         
-        if not os.path.exists(prep_fixed_path):
+        # Descărcare preprocessor_fixed.pkl
+        if not os.path.exists(prep_fixed_path) or os.path.getsize(prep_fixed_path) == 0:
             with st.spinner("Se descarcă preprocessor_fixed.pkl de backup..."):
                 r = requests.get(urls["preprocessor_fixed.pkl"], stream=True)
                 if r.status_code == 200:
-                    os.makedirs(MODELS_DIR, exist_ok=True)
                     with open(prep_fixed_path, 'wb') as f:
                         f.write(r.content)
                 else:
                     return None, None, f"Fișierul local lipsește și descărcarea a eșuat: {r.status_code}"
                     
-    
+        # Descărcare automată pentru dataset_min_main.csv
         dataset_path = os.path.join(BASE_DIR, "dataset_min_main.csv")
         if not os.path.exists(dataset_path) or os.path.getsize(dataset_path) == 0:
             with st.spinner("Se descarcă dataset_min_main.csv de backup..."):
@@ -96,7 +95,7 @@ def load_ml_models():
                     with open(dataset_path, 'wb') as f:
                         f.write(r.content)
 
-        
+        # Descărcare automată pentru data_for_api.csv
         api_data_path = os.path.join(BASE_DIR, "data_for_api.csv")
         if not os.path.exists(api_data_path) or os.path.getsize(api_data_path) == 0:
             with st.spinner("Se descarcă data_for_api.csv de backup..."):
@@ -104,15 +103,14 @@ def load_ml_models():
                 if r.status_code == 200:
                     with open(api_data_path, 'wb') as f:
                         f.write(r.content)
-                        
-        # 3. Încărcarea efectivă a modelelor
+        
+        # 3. Încărcarea efectivă a modelelor în variabilele tale originale
         try:
             recommender = joblib.load(rec_fixed_path)
         except Exception as e:
             return None, None, f"Eroare la citirea [recommender_fixed.pkl]: {str(e)}"
             
         try:
-            # Acesta este preprocesorul 
             preprocessor = joblib.load(prep_fixed_path)
         except Exception as e:
             return None, None, f"Eroare la citirea [preprocessor_fixed.pkl]: {str(e)}"
