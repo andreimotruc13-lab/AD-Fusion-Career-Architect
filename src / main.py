@@ -86,7 +86,25 @@ def load_ml_models():
                         f.write(r.content)
                 else:
                     return None, None, f"Fișierul local lipsește și descărcarea a eșuat: {r.status_code}"
+                    
+    
+        dataset_path = os.path.join(BASE_DIR, "dataset_min_main.csv")
+        if not os.path.exists(dataset_path) or os.path.getsize(dataset_path) == 0:
+            with st.spinner("Se descarcă dataset_min_main.csv de backup..."):
+                r = requests.get("https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/dataset_min_main.csv")
+                if r.status_code == 200:
+                    with open(dataset_path, 'wb') as f:
+                        f.write(r.content)
+
         
+        api_data_path = os.path.join(BASE_DIR, "data_for_api.csv")
+        if not os.path.exists(api_data_path) or os.path.getsize(api_data_path) == 0:
+            with st.spinner("Se descarcă data_for_api.csv de backup..."):
+                r = requests.get("https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/data_for_api.csv")
+                if r.status_code == 200:
+                    with open(api_data_path, 'wb') as f:
+                        f.write(r.content)
+                        
         # 3. Încărcarea efectivă a modelelor
         try:
             recommender = joblib.load(rec_fixed_path)
