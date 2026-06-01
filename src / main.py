@@ -19,70 +19,58 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Loading models securizat prin descărcare directă
 @st.cache_resource
 def load_ml_models():
-    # Căile locale absolute către fișierele mici din folderul src
+    # Căile absolute pentru fișierele din folderul src
     rec_fixed_path = os.path.join(BASE_DIR, "recommender_fixed.pkl")
     prep_fixed_path = os.path.join(BASE_DIR, "preprocessor_fixed.pkl")
-    
-    # Locul unde se vor descărca și salva fișierele mari în folderul src
     rec_text_path = os.path.join(BASE_DIR, "recommender_text.pkl")
     tfidf_path = os.path.join(BASE_DIR, "tfidf_vectorizer.pkl")
     
-    # URL-urile de tip 'resolve' care descarcă fișierul binar complet (Rezolvă definitiv eroarea 69)
+    # URL-uri
     urls = {
         "recommender_text.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/recommender_text.pkl",
         "tfidf_vectorizer.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/tfidf_vectorizer.pkl"
     }
     
     try:
-        # 1. Descărcare recommender_text.pkl dacă nu există local
+        # 1. Descărcare recommender_text.pkl
         if not os.path.exists(rec_text_path):
-            with st.spinner("Se descarcă recommender_text.pkl de pe Hugging Face..."):
+            with st.spinner("Se descarcă recommender_text.pkl..."):
                 r = requests.get(urls["recommender_text.pkl"], stream=True)
                 if r.status_code == 200:
                     with open(rec_text_path, 'wb') as f:
                         f.write(r.content)
                 else:
-                    return None, None, None, None, f"Eroare la descărcare recommender_text (Cod HTTP: {r.status_code})"
+                    return None, None, f"Eroare HTTP la recommender_text: {r.status_code}"
         
-        # 2. Descărcare tfidf_vectorizer.pkl dacă nu există local
+        # 2. Descărcare tfidf_vectorizer.pkl
         if not os.path.exists(tfidf_path):
-            with st.spinner("Se descarcă tfidf_vectorizer.pkl de pe Hugging Face..."):
+            with st.spinner("Se descarcă tfidf_vectorizer.pkl..."):
                 r = requests.get(urls["tfidf_vectorizer.pkl"], stream=True)
                 if r.status_code == 200:
                     with open(tfidf_path, 'wb') as f:
                         f.write(r.content)
                 else:
-                    return None, None, None, None, f"Eroare la descărcare tfidf_vectorizer (Cod HTTP: {r.status_code})"
+                    return None, None, f"Eroare HTTP la tfidf_vectorizer: {r.status_code}"
         
-        # 3. Încărcarea propriu-zisă a modelelor cu verificări individuale
+        # 3. Încărcarea efectivă a modelelor în memorie
         try:
-            recommender_text = joblib.load(rec_text_path)
+            recommender = joblib.load(rec_text_path)
         except Exception as e:
-            return None, None, None, None, f"Eroare la citirea [recommender_text.pkl]: {str(e)}"
+            return None, None, f"Eroare la citirea [recommender_text.pkl]: {str(e)}"
             
         try:
-            tfidf_vectorizer = joblib.load(tfidf_path)
+            preprocessor = joblib.load(tfidf_path)
         except Exception as e:
-            return None, None, None, None, f"Eroare la citirea [tfidf_vectorizer.pkl]: {str(e)}"
+            return None, None, f"Eroare la citirea [tfidf_vectorizer.pkl]: {str(e)}"
             
-        try:
-            recommender_fixed = joblib.load(rec_fixed_path)
-        except Exception as e:
-            return None, None, None, None, f"Eroare la citirea [recommender_fixed.pkl]: {str(e)}"
-            
-        try:
-            preprocessor_fixed = joblib.load(prep_fixed_path)
-        except Exception as e:
-            return None, None, None, None, f"Eroare la citirea [preprocessor_fixed.pkl]: {str(e)}"
-            
-        return recommender_fixed, preprocessor_fixed, recommender_text, tfidf_vectorizer, True
+        # Returnăm exact cele 3 valori 
+        return recommender, preprocessor, True
         
     except Exception as e:
-        return None, None, None, None, f"Eroare generală în load_ml_models: {str(e)}"
+        return None, None, f"Eroare generală: {str(e)}"
 
-recommender_fixed, preprocessor_fixed, recommender_text, tfidf_vectorizer, ml_status = load_ml_models()
-ml_loaded = (ml_status is True)
 
+recommender, preprocessor, ml_status = load_ml_models()
 
 # Configuration and styling
 st.set_page_config(page_title="Candidate Data Manager", page_icon="📋", layout="wide")
