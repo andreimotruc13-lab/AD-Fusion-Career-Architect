@@ -226,7 +226,6 @@ st.sidebar.title("⚙️ Settings")
 st.sidebar.markdown(
     "Please paste in an OpenRouter free API key for the CV architect model (Tab 3)"
 )
-# user_api_key = st.sidebar.text_input("OpenRouter API Key", type="password", placeholder="sk-or-v1-...")
 
 st.sidebar.title("About A&D Fusion")
 st.sidebar.markdown(
@@ -374,61 +373,57 @@ with tab1:
                             for col in benefit_cols:
                                 df_temp[col] = df_temp[col] * 0.5
 
-                    
                             # The prediction block:
                             X_new_processed = preprocessor.transform(df_temp)
 
                             url_dataset = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/dataset_min_main.csv"
+
+                            # FIX 1: folosim requests.get() in loc de pd.read_csv(url) direct
+                            df_jobs = None
                             try:
-                                df_jobs = pd.read_csv(url_dataset)
-                            except Exception as e:
-                                # Fallback în caz că pică request-ul de rețea
-                                df_jobs = pd.read_csv(MAIN_CSV)
+                                r_ds = requests.get(url_dataset, timeout=30)
+                                if r_ds.status_code == 200:
+                                    df_jobs = pd.read_csv(io.StringIO(r_ds.text))
+                            except Exception:
+                                pass
+
+                            if df_jobs is None or df_jobs.empty:
+                                try:
+                                    df_jobs = pd.read_csv(MAIN_CSV)
+                                except Exception:
+                                    df_jobs = pd.DataFrame()
 
                             total_possible = len(df_jobs)
+
                             if total_possible == 0:
                                 st.error(f"⚠️ The dataset is currently empty. Direct download failed.")
-                                search_k = 0
                             else:
+                                # FIX 2: eliminat codul duplicat, totul intr-un singur bloc
                                 search_k = min(300, total_possible)
-                                
+
                                 distances, indices = recommender.kneighbors(X_new_processed, n_neighbors=search_k)
 
                                 recommendations_pool = df_jobs.iloc[indices[0]].copy()
                                 recommendations_pool['distance'] = distances[0]
 
-                                # City filtering 
                                 results = recommendations_pool[recommendations_pool['City'] == city_selected].head(num_matches)
 
-                            distances, indices = recommender.kneighbors(X_new_processed, n_neighbors=search_k)
-
-                            recommendations_pool = df_jobs.iloc[indices[0]].copy()
-                            recommendations_pool['distance'] = distances[0]
-
-                            # City filtering (why we searched 300 earlier)
-                            results = recommendations_pool[recommendations_pool['City'] == city_selected].head(num_matches)
-
-                            # Results
-                            for i, (idx, row) in enumerate(results.iterrows()):
-                                raw_dist = distances[0][i]
-                               
-                                # Strictness formula so that scores won't be suspiciously
-                                # high (due to the cosinus method used in the training of
-                                # the model) or super similar due to our dataset
-                                strictness = 1.5
-                                realistic_score = np.exp(-strictness * raw_dist) * 100
-                                if realistic_score > 99.9: realistic_score = 99.9
-                               
-                                # Output UI
-                                st.info(
-                                    f"**[{i+1}] {row.get('Job Title', 'Unknown Job')}**  \n"
-                                    f"🏢 **Company:** {row.get('Company', 'N/A')} | 💼 **Role:** {row.get('Role', 'N/A')}  \n"
-                                    f"📞 **Contact:** {row.get('Contact', 'N/A')} | 🏢 **City:** {row.get('City', 'Unknown city')}  \n"
-                                    f"💵 **Salary:** {row.get('Salary Range', 'N/A')}  \n"
-                                    f"💭 **Job Description:** {row.get('Job Description', 'N/A')}  \n"
-                                    f"➕ **Benefits:** {row.get("Benefits", 'N/A')}  \n"
-                                    f"🔥 **Match Strength:** `{realistic_score:.1f}%`"
-                                )
+                                for i, (idx, row) in enumerate(results.iterrows()):
+                                    raw_dist = row['distance']
+                                   
+                                    strictness = 1.5
+                                    realistic_score = np.exp(-strictness * raw_dist) * 100
+                                    if realistic_score > 99.9: realistic_score = 99.9
+                                   
+                                    st.info(
+                                        f"**[{i+1}] {row.get('Job Title', 'Unknown Job')}**  \n"
+                                        f"🏢 **Company:** {row.get('Company', 'N/A')} | 💼 **Role:** {row.get('Role', 'N/A')}  \n"
+                                        f"📞 **Contact:** {row.get('Contact', 'N/A')} | 🏢 **City:** {row.get('City', 'Unknown city')}  \n"
+                                        f"💵 **Salary:** {row.get('Salary Range', 'N/A')}  \n"
+                                        f"💭 **Job Description:** {row.get('Job Description', 'N/A')}  \n"
+                                        f"➕ **Benefits:** {row.get('Benefits', 'N/A')}  \n"
+                                        f"🔥 **Match Strength:** `{realistic_score:.1f}%`"
+                                    )
                         except Exception as e:
                             st.error(f"⚠️ Could not generate recommendations. Error: {e}")
                 else:
@@ -536,13 +531,12 @@ with tab3:
                             {"role": "system", "content": system_instructions},
                             {"role": "user", "content": f"Here is my CV:\n{cv_text}"}
                         ],
-                        temperature=0.4 #Good for data extraction
+                        temperature=0.4
                     )
 
                     if response and response.choices:
                         result_text = response.choices[0].message.content
                         st.success("CV Audit Complete!")
-                        #Respone UI design
                         st.markdown(
                             f"""
                             <div style="
