@@ -30,16 +30,39 @@ from sklearn.preprocessing import StandardScaler
 
 # Loading models
 @st.cache_resource
+import os
+import requests
+import joblib
+import streamlit as st
+
+@st.cache_resource
 def load_ml_models():
-    base_path = os.path.dirname(__file__)
+    # 1. Link Hugging face
+    model_url = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/recommender_fixed.pkl"
+    prep_url = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/preprocessor_fixed.pkl"
     
-    model_path = os.path.join(base_path, "..", "models", "recommender_fixed.pkl")
-    prep_path = os.path.join(base_path, "..", "models", "preprocessor_fixed.pkl")
-   
+    # Căile ude salvare a fisierelor
+    model_path = "recommender_fixed.pkl"
+    prep_path = "preprocessor_fixed.pkl"
+    
     try:
-        if not os.path.exists(model_path) or not os.path.exists(prep_path):
-            return None, None, "Files not found!"
+        # Descarcă Recommender dacă nu există deja local
+        if not os.path.exists(model_path):
+            with st.spinner("Se descarcă modelul de recomandare de pe Hugging Face..."):
+                r = requests.get(model_url, stream=True)
+                with open(model_path, "wb") as f:
+                    for chunk in r.iter_content(chunk_size=1024*1024):
+                        if chunk: f.write(chunk)
+                        
+        # Descarcă Preprocessor dacă nu există deja local
+        if not os.path.exists(prep_path):
+            with st.spinner("Se descarcă preprocesorul..."):
+                r = requests.get(prep_url, stream=True)
+                with open(prep_path, "wb") as f:
+                    for chunk in r.iter_content(chunk_size=1024*1024):
+                        if chunk: f.write(chunk)
            
+        # Incarcarea in memorie
         recommender = joblib.load(model_path)
         preprocessor = joblib.load(prep_path)
         return recommender, preprocessor, True
