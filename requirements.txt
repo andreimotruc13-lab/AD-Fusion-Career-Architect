@@ -6,3 +6,4 @@ joblib
 openai
 scikit-learn==1.8.0
 huggingface_hub
+requests
