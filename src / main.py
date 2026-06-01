@@ -11,14 +11,6 @@ from sklearn.preprocessing import StandardScaler
 import requests
 
 
-ml_loaded = False
-
-try:
-    ml_loaded = True
-except Exception as e:
-    import streamlit as st
-    st.error(f"Modelul nu s-a putut încărca: {e}")
-    ml_loaded = False
     
 # detectam calea catre folder
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -79,8 +71,14 @@ def load_ml_models():
         
     except Exception as e:
         return None, None, f"Eroare generală: {str(e)}"
-
+        
 recommender, preprocessor, ml_status = load_ml_models()
+
+# ml_status va fi True 
+ml_loaded = (ml_status is True)
+
+if not ml_loaded:
+    st.sidebar.error(f"Modelele ML nu s-au încărcat: {ml_status}")
 
 # Configuration and styling
 st.set_page_config(page_title="Candidate Data Manager", page_icon="📋", layout="wide")
