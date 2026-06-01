@@ -30,44 +30,47 @@ from sklearn.preprocessing import StandardScaler
 
 # Loading models
 @st.cache_resource
-import os
-import requests
-import joblib
-import streamlit as st
-
-@st.cache_resource
 def load_ml_models():
-    # 1. Link Hugging face
-    model_url = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/recommender_fixed.pkl"
-    prep_url = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/preprocessor_fixed.pkl"
+    # 1. LINK-URILE pentru fisierele mari
+    rec_text_url = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/recommender_text.pkl"
+    tfidf_url = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/tfidf_vectorizer.pkl"
     
-    # Căile ude salvare a fisierelor
-    model_path = "recommender_fixed.pkl"
-    prep_path = "preprocessor_fixed.pkl"
+    # Căile locale unde se salveaza fisierele mari
+    rec_text_path = "recommender_text.pkl"
+    tfidf_path = "tfidf_vectorizer.pkl"
+    
+    # Căile fișierelor mici
+    rec_fixed_path = "recommender_fixed.pkl"
+    prep_fixed_path = "preprocessor_fixed.pkl"
     
     try:
-        # Descarcă Recommender dacă nu există deja local
-        if not os.path.exists(model_path):
-            with st.spinner("Se descarcă modelul de recomandare de pe Hugging Face..."):
-                r = requests.get(model_url, stream=True)
-                with open(model_path, "wb") as f:
+        # Descarcă recommender_text.pkl dacă nu există local
+        if not os.path.exists(rec_text_path):
+            with st.spinner("Se descarcă modelul text de pe Hugging Face..."):
+                r = requests.get(rec_text_url, stream=True)
+                with open(rec_text_path, "wb") as f:
                     for chunk in r.iter_content(chunk_size=1024*1024):
                         if chunk: f.write(chunk)
                         
-        # Descarcă Preprocessor dacă nu există deja local
-        if not os.path.exists(prep_path):
-            with st.spinner("Se descarcă preprocesorul..."):
-                r = requests.get(prep_url, stream=True)
-                with open(prep_path, "wb") as f:
+        # Descarcă tfidf_vectorizer.pkl dacă nu există local
+        if not os.path.exists(tfidf_path):
+            with st.spinner("Se descarcă vectorizatorul TF-IDF de pe Hugging Face..."):
+                r = requests.get(tfidf_url, stream=True)
+                with open(tfidf_path, "wb") as f:
                     for chunk in r.iter_content(chunk_size=1024*1024):
                         if chunk: f.write(chunk)
            
-        # Incarcarea in memorie
-        recommender = joblib.load(model_path)
-        preprocessor = joblib.load(prep_path)
-        return recommender, preprocessor, True
+        # Încărcăm modelele mari
+        recommender_text = joblib.load(rec_text_path)
+        tfidf_vectorizer = joblib.load(tfidf_path)
+        
+        # Încărcăm modelele mici 
+        recommender_fixed = joblib.load(rec_fixed_path)
+        preprocessor_fixed = joblib.load(prep_fixed_path)
+        
+        return recommender_fixed, preprocessor_fixed, recommender_text, tfidf_vectorizer, True
     except Exception as e:
-        return None, None, str(e)
+        return None, None, None, None, str(e)
 
 recommender, preprocessor, ml_status = load_ml_models()
 ml_loaded = (ml_status is True)
