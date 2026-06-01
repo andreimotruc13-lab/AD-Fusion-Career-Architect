@@ -32,8 +32,8 @@ from sklearn.preprocessing import StandardScaler
 @st.cache_resource
 def load_ml_models():
     # 1. LINK-URILE pentru fisierele mari
-    rec_text_url = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/recommender_text.pkl"
-    tfidf_url = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/tfidf_vectorizer.pkl"
+    rec_text_url = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/recommender_text.pkl"
+    tfidf_url = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/tfidf_vectorizer.pkl"
     
     # Căile locale unde se salveaza fisierele mari
     rec_text_path = "recommender_text.pkl"
