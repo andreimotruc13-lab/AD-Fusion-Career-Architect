@@ -30,19 +30,25 @@ from sklearn.preprocessing import StandardScaler
 
 # Loading models
 @st.cache_resource
+@st.cache_resource
 def load_ml_models():
     import requests
-    # 1. Linkuri pentru fisierele mari
-    rec_text_url = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/recommender_text.pkl"
-    tfidf_url = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/tfidf_vectorizer.pkl"
+    import os
     
-    # Căile locale unde se salveaza fisierele mari
-    rec_text_path = "recommender_text.pkl"
-    tfidf_path = "tfidf_vectorizer.pkl"
+    # Găsește automat folderul exact unde stă main.py (adică folderul 'src')
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     
-    # Căile fișierelor mici
-    rec_fixed_path = "recommender_fixed.pkl"
-    prep_fixed_path = "preprocessor_fixed.pkl"
+    # Căile absolute și sigure pentru fișierele MICI (aflate pe GitHub)
+    rec_fixed_path = os.path.join(BASE_DIR, "recommender_fixed.pkl")
+    prep_fixed_path = os.path.join(BASE_DIR, "preprocessor_fixed.pkl")
+    
+    # Căile absolute și sigure unde se vor descărca fișierele MARI (tot în 'src')
+    rec_text_path = os.path.join(BASE_DIR, "recommender_text.pkl")
+    tfidf_path = os.path.join(BASE_DIR, "tfidf_vectorizer.pkl")
+    
+    # Link-urile directoare de pe Hugging Face pentru fișierele MARI
+    rec_text_url = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/recommender_text.pkl"
+    tfidf_url = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/tfidf_vectorizer.pkl"
     
     try:
         # Descarcă recommender_text.pkl dacă nu există local
@@ -61,11 +67,9 @@ def load_ml_models():
                     for chunk in r.iter_content(chunk_size=1024*1024):
                         if chunk: f.write(chunk)
            
-        # Încărcăm modelele mari
+        # Încărcare în memorie folosind căile dinamice sigure
         recommender_text = joblib.load(rec_text_path)
         tfidf_vectorizer = joblib.load(tfidf_path)
-        
-        # Încărcăm modelele mici 
         recommender_fixed = joblib.load(rec_fixed_path)
         preprocessor_fixed = joblib.load(prep_fixed_path)
         
