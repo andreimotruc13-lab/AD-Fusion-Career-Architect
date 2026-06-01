@@ -396,17 +396,6 @@ with tab1:
                             total_possible = len(df_jobs)
 
 
-st.write(f"DEBUG - total_possible: {total_possible}")
-st.write(f"DEBUG - df_jobs is None: {df_jobs is None}")
-if df_jobs is not None:
-    st.write(f"DEBUG - df_jobs shape: {df_jobs.shape}")
-try:
-    r_test = requests.get(url_dataset, timeout=30)
-    st.write(f"DEBUG - status code: {r_test.status_code}")
-except Exception as ex:
-    st.write(f"DEBUG - requests error: {ex}")
-st.write(f"DEBUG - MAIN_CSV exists: {os.path.exists(MAIN_CSV)}")
-st.write(f"DEBUG - MAIN_CSV size: {os.path.getsize(MAIN_CSV) if os.path.exists(MAIN_CSV) else 'N/A'}")
 
                             if total_possible == 0:
                                 st.error(f"⚠️ The dataset is currently empty. Direct download failed.")
