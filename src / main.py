@@ -1,3 +1,22 @@
+import sys
+import types
+
+# Creating a fake 'main' module in memory
+if 'main' not in sys.modules:
+    main_module = types.ModuleType('main')
+    sys.modules['main'] = main_module
+else:
+    main_module = sys.modules['main']
+
+# Possibly create a fallback dummy
+try:
+    from sklearn.compose._column_transformer import _RemainderColsList
+    main_module._RemainderColsList = _RemainderColsList
+except ImportError:
+    class _RemainderColsList(list):
+        pass
+    main_module._RemainderColsList = _RemainderColsList
+
 import streamlit as st
 import pandas as pd
 import os
