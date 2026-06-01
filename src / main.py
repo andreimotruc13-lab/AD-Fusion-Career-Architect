@@ -12,35 +12,30 @@ import requests
 
 # Loading models securizat prin descărcare directă
 @st.cache_resource
+from huggingface_hub import hf_hub_download
+
+# Loading models securizat prin descărcare directă
+@st.cache_resource
 def load_ml_models():
-
-    rec_text_url = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/recommender_text.pkl"
-    tfidf_url = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/tfidf_vectorizer.pkl"
-    
-
-    rec_text_path = "recommender_text.pkl"
-    tfidf_path = "tfidf_vectorizer.pkl"
-    
-   
+    # Căile fișierelor MICI care se află deja pe GitHub în același folder cu scriptul
     rec_fixed_path = "recommender_fixed.pkl"
     prep_fixed_path = "preprocessor_fixed.pkl"
     
     try:
-        # ---- DESCĂRCARE MODELE MARI DE PE HUGGING FACE ----
-        if not os.path.exists(rec_text_path):
-            with st.spinner("Se descarcă modelul text de pe Hugging Face..."):
-                r = requests.get(rec_text_url, stream=True)
-                with open(rec_text_path, "wb") as f:
-                    for chunk in r.iter_content(chunk_size=1024*1024):
-                        if chunk: f.write(chunk)
+
+        with st.spinner("Se descarcă modelul text de pe Hugging Face..."):
+            rec_text_path = hf_hub_download(
+                repo_id="AndrIIII7/career-architect",
+                filename="src/recommender_text.pkl",
+                repo_type="space"
+            )
                         
-        if not os.path.exists(tfidf_path):
-            with st.spinner("Se descarcă vectorizatorul TF-IDF de pe Hugging Face..."):
-                r = requests.get(tfidf_url, stream=True)
-                with open(tfidf_path, "wb") as f:
-                    for chunk in r.iter_content(chunk_size=1024*1024):
-                        if chunk: f.write(chunk)
-           
+        with st.spinner("Se descarcă vectorizatorul TF-IDF de pe Hugging Face..."):
+            tfidf_path = hf_hub_download(
+                repo_id="AndrIIII7/career-architect",
+                filename="src/tfidf_vectorizer.pkl",
+                repo_type="space"
+            )
     
         try:
             recommender_text = joblib.load(rec_text_path)
@@ -51,6 +46,21 @@ def load_ml_models():
             tfidf_vectorizer = joblib.load(tfidf_path)
         except Exception as e:
             return None, None, None, None, f"Eroare la [tfidf_vectorizer.pkl]: {str(e)}"
+
+        try:
+            recommender_fixed = joblib.load(rec_fixed_path)
+        except Exception as e:
+            return None, None, None, None, f"Eroare la [recommender_fixed.pkl]: {str(e)}"
+
+        try:
+            preprocessor_fixed = joblib.load(prep_fixed_path)
+        except Exception as e:
+            return None, None, None, None, f"Eroare la [preprocessor_fixed.pkl]: {str(e)}"
+        
+        return recommender_fixed, preprocessor_fixed, recommender_text, tfidf_vectorizer, True
+        
+    except Exception as e:
+        return None, None, None, None, f"Eroare generală la descărcare de pe HF Hub: {str(e)}"
 
         try:
             recommender_fixed = joblib.load(rec_fixed_path)
