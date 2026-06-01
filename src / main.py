@@ -10,10 +10,6 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
 import requests
 
-# Loading models securizat prin descărcare directă
-@st.cache_resource
-from huggingface_hub import hf_hub_download
-
 # detectam calea catre folder
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Loading models securizat prin descărcare directă
