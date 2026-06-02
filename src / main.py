@@ -26,10 +26,12 @@ import sklearn
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
+from sklearn.feature_extraction.text import TfidfVectorizer
 import requests
 
 # detectam calea catre folder
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # Loading models securizat prin descărcare directă
 @st.cache_resource
 def load_ml_models():
@@ -55,13 +57,18 @@ def load_ml_models():
         
     rec_fixed_path = os.path.join(MODELS_DIR, "recommender_fixed.pkl")
     prep_fixed_path = os.path.join(MODELS_DIR, "preprocessor_fixed.pkl")
+    tfidf_path = os.path.join(MODELS_DIR, "tfidf_vectorizer.pkl")
+    rec_text_path = os.path.join(MODELS_DIR, "recommender_text_nlp.pkl") # Saved locally with a distinct name to avoid OS clashes
     
     urls = {
-        "recommender_fixed.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/recommender_text.pkl",
-        "preprocessor_fixed.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/preprocessor_text.pkl"
+        "recommender_fixed.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/recommender_fixed.pkl", 
+        "preprocessor_fixed.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/preprocessor_text.pkl",
+        "tfidf_vectorizer.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/tfidf_vectorizer.pkl",
+        "recommender_text.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/recommender_text.pkl"
     }
     
     try:
+        # Tab 1 model downloads
         if not os.path.exists(rec_fixed_path) or os.path.getsize(rec_fixed_path) == 0:
             r = requests.get(urls["recommender_fixed.pkl"], stream=True)
             if r.status_code == 200:
@@ -73,14 +80,31 @@ def load_ml_models():
             if r.status_code == 200:
                 with open(prep_fixed_path, 'wb') as f:
                     f.write(r.content)
+
+        # Tab 3 RAG models
+        if not os.path.exists(tfidf_path) or os.path.getsize(tfidf_path) == 0:
+            r = requests.get(urls["tfidf_vectorizer.pkl"], stream=True)
+            if r.status_code == 200:
+                with open(tfidf_path, 'wb') as f:
+                    f.write(r.content)
+
+        if not os.path.exists(rec_text_path) or os.path.getsize(rec_text_path) == 0:
+            r = requests.get(urls["recommender_text.pkl"], stream=True)
+            if r.status_code == 200:
+                with open(rec_text_path, 'wb') as f:
+                    f.write(r.content)
         
+        #Loading into memory
         recommender = joblib.load(rec_fixed_path)
         preprocessor = joblib.load(prep_fixed_path)
-        return recommender, preprocessor, True
+        tfidf_vec = joblib.load(tfidf_path)
+        rec_text = joblib.load(rec_text_path)
+        
+        return recommender, preprocessor, tfidf_vec, rec_text, True
     except Exception as e:
-        return None, None, f"Eroare la incarcare modele: {str(e)}"
+        return None, None, None, None, f"Eroare la incarcare modele: {str(e)}"
 
-recommender, preprocessor, ml_status = load_ml_models()
+recommender, preprocessor, tfidf_vectorizer, recommender_text, ml_status = load_ml_models()
 ml_loaded = (ml_status is True)
 
 if not ml_loaded:
@@ -435,19 +459,35 @@ with tab3:
     if analyze_btn:
         if not cv_text.strip():
             st.warning("Please paste your CV text to analyze.")
+        elif not ml_loaded:
+            st.error("Text processing models are not loaded. Please check your Hugging Face connections.")
         else:
             with st.spinner("Analyzing CV against market data..."):
                 try:
-                    df_upd = None
+                    df_jobs = None
                     try:
-                        url_data_for_api = "https://docs.google.com/uc?export=download&id=1DF-qFFj0pEzFoJAnX0k32Qh12MI363Q1"
-                        df_upd = pd.read_csv(url_data_for_api)
+                        df_jobs = pd.read_csv(MAIN_CSV)
                     except Exception as e:
-                        st.error(f"Could not load data_for_api from Google Drive. Error: {e}")
-                        df_upd = pd.DataFrame()
+                        st.error(f"Could not load main dataset. Error: {e}")
+                        df_jobs = pd.DataFrame()
 
-                    if df_upd is not None and not df_upd.empty:
-                        sample_data = df_upd.head(5000).to_csv(index=False, sep='|')
+                    if df_jobs is not None and not df_jobs.empty:
+                        # Filling missing text identically to training script to prevent transform errors
+                        df_jobs['skills'] = df_jobs.get('skills', pd.Series(dtype=str)).fillna('')
+                        df_jobs['Job Title'] = df_jobs.get('Job Title', pd.Series(dtype=str)).fillna('')
+                        df_jobs['Job Description'] = df_jobs.get('Job Description', pd.Series(dtype=str)).fillna('')
+                        df_jobs['Responsibilities'] = df_jobs.get('Responsibilities', pd.Series(dtype=str)).fillna('')
+                        
+                        # Vectorizing the incoming CV string using the tfidf vectorizer
+                        cv_vector = tfidf_vectorizer.transform([cv_text]).toarray()
+                        
+                        # Finding the closest matches
+                        search_k = min(15, len(df_jobs))
+                        distances, indices = recommender_text.kneighbors(cv_vector, n_neighbors=search_k)
+                        
+                        # Isolating for the API feeding
+                        top_matches_df = df_jobs.iloc[indices[0]].copy()
+                        sample_data = top_matches_df.to_csv(index=False, sep='|')
                     else:
                         sample_data = "DATA NOT FOUND"
 
@@ -460,7 +500,7 @@ with tab3:
                     from openai import OpenAI
                     client = OpenAI(
                         base_url="https://openrouter.ai/api/v1",
-                        timeout=300.0,
+                        timeout=500.0,
                         api_key=active_key,
                         default_headers={
                             "HTTP-Referer": "http://localhost:8501",
@@ -469,21 +509,21 @@ with tab3:
                     )
 
                     system_instructions = f"""
-                    You are the "A&D Fusion Career Architect." You are working with a curated dataset of 5000 premium job market entries in Moldova.
+                    You are the "A&D Fusion Career Architect." You are working with a curated dataset of the most relevant job market entries in Moldova matching the user's career path.
 
-                    --- START OF DATA ---
-                    This is just a test, my API isn't working well atm
-                    --- END OF DATA ---
+                    --- START OF RELEVANT RAG DATA ---
+                    {sample_data}
+                    --- END OF RELEVANT RAG DATA ---
 
-                    1. PRECISION: Since we are using a curated subset of 5000 entries, treat these as the definitive benchmarks for 'Salary Range' and 'Skills'.
+                    1. PRECISION: Treat these matching rows as the definitive benchmarks for 'Salary Range' and 'Skills'.
                     2. CV UPGRADE: If a user provides a CV, perform a "Deep Audit":
-                       - Find the closest 2-3 roles in the provided data.
-                       - Use the 'skills' and 'Experience' from those roles to suggest 2 or more(depending on the CV) high-impact additions to the user's CV.
+                       - Find the closest 2-5 roles in the provided data depending on the closeness and length of response.
+                       - Use the 'skills' and 'Experience' from those roles to suggest 2 or more (depending on the CV) high-impact additions to the user's CV.
                        - Rewrite a section of their CV using the STAR method (Action -> Result).
                     3. THE CITY CONTEXT: The user is looking for roles in {target_city}. Use the 'City' data to ensure the advice is localized to this specific market.
-                    4. LIMITATIONS: If the user's career path isn't represented in these 5,000 rows, honestly state: "Based on our current high-density market subset, we don't have a direct match, but here is the closest strategic advice."
+                    4. LIMITATIONS: If the user's career path isn't perfectly represented in these rows, honestly state: "Based on our current market subset, we don't have a direct match, but here is the closest strategic advice."
                     5. LENGTH OF OUTPUT: Make sure that the length of what you give the user is: {length_of_response}
-                    6. IMPORTANT: Keep in mind that the user will only be able to input something once, so do not ask follow-up questions and make sure to clarify all possible questions in 1 message
+                    6. IMPORTANT: Keep in mind that the user will only be able to input something once, so do not ask follow-up questions and make sure to clarify all possible questions in 1 message.
                     """
 
                     response = client.chat.completions.create(
