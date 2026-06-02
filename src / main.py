@@ -97,7 +97,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Constants and data mapping
-#Reading dataset_min_main directly from Google Drive URL instead of a local filename string
 MAIN_CSV = "https://docs.google.com/uc?export=download&id=1quji8xUbgNZYzZcv6vQJgcNaM7qZc0S9"
 SUB_CSV = "user_submissions.csv"
 
@@ -160,7 +159,6 @@ QUALIFICATIONS = {
 
 LENGTHS = ['Short And Concise', 'Medium', 'Long And Detailed']
 
-# Lists of columns we need for the model to work
 tech_cols = ['Tech_Backend', 'Tech_Frontend', 'Tech_DevOps_Cloud',
             'Tech_Data_AI', 'Mgmt_Project_Agile', 'Mgmt_Strategic_Leadership',
             'Fin_Accounting_Audit', 'Fin_Analysis_Investment', 'Legal_Services',
@@ -194,7 +192,6 @@ required_cols = ['Qualifications', 'Work Type', 'Min_experience', 'Max_experienc
                  'Creative_Design_Art', 'Health_Medical', 'Science_Engineering',
                  'Service_Events', 'Service_Specialized', 'Soft_Skills_Score', 'Cluster', 'Archetype']
 
-# Intiliazation
 def get_all_columns():
     cols = ["Female", "Male"] + [city for city in CITIES if city != "Balti"] + \
            ["Qualifications", "Work Type", "Min_experience", "Max_experience", "Soft_Skills_Score"]
@@ -205,21 +202,15 @@ def get_all_columns():
 
 def init_files():
     cols = get_all_columns()
-    # Handle files initialization safely now that MAIN_CSV is a URL
     if not os.path.exists(SUB_CSV):
         pd.DataFrame(columns=cols).to_csv(SUB_CSV, index=False)
 
 init_files()
 
-
-# Sidebar with API key and general info
+# Sidebar Layout
 st.sidebar.markdown(
     """Note: Job locations and salaries are deterministic simulations,
     adapting a global dataset to reflect the Moldovan market context for demonstration purposes."""
-)
-st.sidebar.title("⚙️ Settings")
-st.sidebar.markdown(
-    "Please paste in an OpenRouter free API key for the CV architect model (Tab 3)"
 )
 
 st.sidebar.title("About A&D Fusion")
@@ -241,7 +232,6 @@ with tab1:
     st.header("Candidate Information Form")
    
     with st.form("candidate_form", clear_on_submit=True):
-        # Personal information
         st.subheader("1. Personal Information")
         col1, col2 = st.columns(2)
         with col1:
@@ -254,7 +244,6 @@ with tab1:
            
         st.divider()
        
-        # Qualifications and work type
         st.subheader("2. Qualifications & Work Type")
         col3, col4 = st.columns(2)
         with col3:
@@ -264,13 +253,11 @@ with tab1:
            
         st.divider()
 
-        # Experience
         st.subheader("3. Experience")
         experience = st.select_slider("Years of Experience", options=list(EXP_RANGES.keys()))
        
         st.divider()
 
-        # Skills
         st.subheader("4. Skills & Domains")
         st.caption("Check all applicable skills")
         skills_state = {}
@@ -290,7 +277,6 @@ with tab1:
 
         st.divider()
 
-        # Benefits
         st.subheader("5. Benefits & Perks")
         benefits_state = {}
         b_cols = st.columns(3)
@@ -301,7 +287,6 @@ with tab1:
         st.subheader("6. Recommendation Settings")
         num_matches = st.slider("Number of jobs to recommend", min_value=1, max_value=10, value=5)
 
-        # Submission
         st.divider()
         submitted = st.form_submit_button("💾 Submit Profile", use_container_width=True)
        
@@ -309,7 +294,6 @@ with tab1:
             if not full_name.strip():
                 st.error("Please provide a Full Name.")
             else:
-                # Build mapping
                 row = {c: 0 for c in get_all_columns()}
                 if gender == "Female": row["Female"] = 1
                 if gender == "Male": row["Male"] = 1
@@ -318,13 +302,11 @@ with tab1:
                 row["Qualifications"] = QUALIFICATIONS[qualifications]
                 row["Work Type"] = WORK_TYPES[work_type]
                
-                # Midpoint mapping
                 midpoint = EXP_RANGES[experience]
                 row["Min_experience"] = midpoint
                 row["Max_experience"] = midpoint
                 row["Soft_Skills_Score"] = soft_skills
                
-                # Skills and benefits encoding
                 for col_name, checked in skills_state.items():
                     row[col_name] = 1 if checked else 0
                 for benefit, checked in benefits_state.items():
@@ -335,14 +317,12 @@ with tab1:
                     cols_to_drop = ['Balti', 'Full name', 'Age']
                     new_df.drop(columns=[c for c in cols_to_drop if c in new_df.columns], inplace=True)
 
-                # Append file
                 existing_df = pd.read_csv(SUB_CSV)
                 updated_df = pd.concat([existing_df, new_df], ignore_index=True)
                 updated_df.to_csv(SUB_CSV, index=False)
                    
                 st.success(f"✅ Profile for {full_name} submitted successfully!")
 
-                # Model integration
                 if ml_loaded:
                     st.divider()
                     st.subheader("🎯 Your Recommended Jobs")
@@ -351,14 +331,12 @@ with tab1:
                         try:
                             df_temp = new_df.copy()
 
-                            # If missing column, we make it = 0
                             for col in required_cols:
                                 if col not in df_temp.columns:
                                     df_temp[col] = 0
 
                             df_temp = df_temp[required_cols]
 
-                            # Applying custom weights to some columns
                             for col in tech_cols:
                                 df_temp[col] = df_temp[col] * 20.0
 
@@ -367,12 +345,10 @@ with tab1:
                             for col in benefit_cols:
                                 df_temp[col] = df_temp[col] * 0.5
 
-                            # The prediction block:
                             X_new_processed = preprocessor.transform(df_temp)
 
                             df_jobs = None
                             try:
-                                # Reading directly from Google Drive URL here
                                 df_jobs = pd.read_csv(MAIN_CSV)
                             except Exception:
                                 df_jobs = pd.DataFrame()
@@ -417,7 +393,6 @@ with tab1:
 with tab2:
     st.header("Dataset Viewer")
    
-    # Loading main dataset directly from Google Drive path variable
     try:
         df_main = pd.read_csv(MAIN_CSV)
     except Exception as e:
@@ -425,14 +400,12 @@ with tab2:
        
     search_query = st.text_input("🔍 Search across all columns (case-insensitive)", placeholder="Type a name, city, skill, etc...")
    
-    # Filtering logic
     if search_query:
         mask = df_main.astype(str).apply(lambda x: x.str.contains(search_query, case=False, na=False)).any(axis=1)
         filtered_df = df_main[mask]
     else:
         filtered_df = df_main
 
-    # Metrics and download
     colA, colB = st.columns([1, 4])
     with colA:
         st.metric("Total Rows", len(filtered_df))
@@ -445,7 +418,6 @@ with tab2:
             mime="text/csv",
         )
 
-    # Display Table
     st.dataframe(filtered_df, use_container_width=True, hide_index=True)
 
 
@@ -468,7 +440,6 @@ with tab3:
                 try:
                     df_upd = None
                     try:
-                        # CHANGED HERE: Fetching data_for_api directly from the direct-link Google Drive url
                         url_data_for_api = "https://docs.google.com/uc?export=download&id=1DF-qFFj0pEzFoJAnX0k32Qh12MI363Q1"
                         df_upd = pd.read_csv(url_data_for_api)
                     except Exception as e:
@@ -480,9 +451,12 @@ with tab3:
                     else:
                         sample_data = "DATA NOT FOUND"
 
-                    active_key = st.secrets["OPENROUTER_API_KEY"]
+                    if "OPENROUTER_API_KEY" in st.secrets:
+                        active_key = st.secrets["OPENROUTER_API_KEY"]
+                    else:
+                        st.error("🔑 API Key is completely missing from your Streamlit Secrets Panel!")
+                        st.stop()
 
-                    # The openrouter client setup
                     from openai import OpenAI
                     client = OpenAI(
                         base_url="https://openrouter.ai/api/v1",
@@ -494,7 +468,6 @@ with tab3:
                         }
                     )
 
-                    # System prompt
                     system_instructions = f"""
                     You are the "A&D Fusion Career Architect." You are working with a curated dataset of 5000 premium job market entries in Moldova.
 
@@ -513,7 +486,6 @@ with tab3:
                     6. IMPORTANT: Keep in mind that the user will only be able to input something once, so do not ask follow-up questions and make sure to clarify all possible questions in 1 message
                     """
 
-                    # Executing the call
                     response = client.chat.completions.create(
                         model="openrouter/owl-alpha",
                         messages=[
