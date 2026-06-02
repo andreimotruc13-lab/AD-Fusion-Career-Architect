@@ -511,6 +511,7 @@ with tab3:
                     1. PRECISION: Treat these matching rows as the definitive benchmarks for 'Salary Range' and 'Skills'.
                     2. CV UPGRADE: If a user provides a CV, perform a "Deep Audit":
                        - Find the closest 2-5 roles in the provided data depending on the closeness and length of response.
+                       - After finding those closest roles please show/recommend them to the sender so they know what exactly they are improving their CV for.
                        - Use the 'skills' and 'Experience' from those roles to suggest 2 or more (depending on the CV) high-impact additions to the user's CV.
                        - Rewrite a section of their CV using the STAR method (Action -> Result).
                     3. THE CITY CONTEXT: The user is looking for roles in {target_city}. Use the 'City' data to ensure the advice is localized to this specific market.
