@@ -60,41 +60,34 @@ def load_ml_models():
     tfidf_path = os.path.join(MODELS_DIR, "tfidf_vectorizer.pkl")
     rec_text_path = os.path.join(MODELS_DIR, "recommender_text.pkl") 
     
+    # FIX: Removed '/src/' from paths and matched the exact filenames on Hugging Face
     urls = {
-        "recommender_fixed.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/recommender_fixed.pkl", 
-        "preprocessor_fixed.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/preprocessor_text.pkl",
-        "tfidf_vectorizer.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/tfidf_vectorizer.pkl",
-        "recommender_text.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/recommender_text.pkl"
+        "recommender_fixed.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/recommender_fixed.pkl", 
+        "preprocessor_fixed.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/preprocessor_fixed.pkl",
+        "tfidf_vectorizer.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/tfidf_vectorizer.pkl",
+        "recommender_text.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/recommender_text.pkl"
     }
     
     try:
-        # Tab 1 model downloads
-        if not os.path.exists(rec_fixed_path) or os.path.getsize(rec_fixed_path) == 0:
-            r = requests.get(urls["recommender_fixed.pkl"], stream=True)
-            if r.status_code == 200:
-                with open(rec_fixed_path, 'wb') as f:
-                    f.write(r.content)
-        
-        if not os.path.exists(prep_fixed_path) or os.path.getsize(prep_fixed_path) == 0:
-            r = requests.get(urls["preprocessor_fixed.pkl"], stream=True)
-            if r.status_code == 200:
-                with open(prep_fixed_path, 'wb') as f:
-                    f.write(r.content)
+        # Loop through models to download them safely and avoid repetitive blocks
+        paths_map = {
+            "recommender_fixed.pkl": rec_fixed_path,
+            "preprocessor_fixed.pkl": prep_fixed_path,
+            "tfidf_vectorizer.pkl": tfidf_path,
+            "recommender_text.pkl": rec_text_path
+        }
 
-        # Tab 3 RAG models
-        if not os.path.exists(tfidf_path) or os.path.getsize(tfidf_path) == 0:
-            r = requests.get(urls["tfidf_vectorizer.pkl"], stream=True)
-            if r.status_code == 200:
-                with open(tfidf_path, 'wb') as f:
-                    f.write(r.content)
-
-        if not os.path.exists(rec_text_path) or os.path.getsize(rec_text_path) == 0:
-            r = requests.get(urls["recommender_text.pkl"], stream=True)
-            if r.status_code == 200:
-                with open(rec_text_path, 'wb') as f:
-                    f.write(r.content)
+        for file_name, file_path in paths_map.items():
+            if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
+                r = requests.get(urls[file_name], stream=True)
+                if r.status_code == 200:
+                    with open(file_path, 'wb') as f:
+                        f.write(r.content)
+                else:
+                    # Clearing error visibility instead of failing silently
+                    return None, None, None, None, f"Failed to download {file_name}. Status code: {r.status_code}"
         
-        #Loading into memory
+        # Loading into memory
         recommender = joblib.load(rec_fixed_path)
         preprocessor = joblib.load(prep_fixed_path)
         tfidf_vec = joblib.load(tfidf_path)
