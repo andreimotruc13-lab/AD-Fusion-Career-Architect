@@ -58,7 +58,7 @@ def load_ml_models():
     rec_fixed_path = os.path.join(MODELS_DIR, "recommender_fixed.pkl")
     prep_fixed_path = os.path.join(MODELS_DIR, "preprocessor_fixed.pkl")
     tfidf_path = os.path.join(MODELS_DIR, "tfidf_vectorizer.pkl")
-    rec_text_path = os.path.join(MODELS_DIR, "recommender_text_nlp.pkl") # Saved locally with a distinct name to avoid OS clashes
+    rec_text_path = os.path.join(MODELS_DIR, "recommender_text.pkl") 
     
     urls = {
         "recommender_fixed.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/recommender_fixed.pkl", 
