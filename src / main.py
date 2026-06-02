@@ -472,7 +472,7 @@ with tab3:
                     You are the "A&D Fusion Career Architect." You are working with a curated dataset of 5000 premium job market entries in Moldova.
 
                     --- START OF DATA ---
-                    {sample_data}
+                    This is just a test, my API isn't working well atm
                     --- END OF DATA ---
 
                     1. PRECISION: Since we are using a curated subset of 5000 entries, treat these as the definitive benchmarks for 'Salary Range' and 'Skills'.
