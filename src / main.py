@@ -97,7 +97,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Constants and data mapping
-MAIN_CSV = "dataset_min_main.csv"
+#Reading dataset_min_main directly from Google Drive URL instead of a local filename string
+MAIN_CSV = "https://docs.google.com/uc?export=download&id=1quji8xUbgNZYzZcv6vQJgcNaM7qZc0S9"
 SUB_CSV = "user_submissions.csv"
 
 CITIES = ['Balti', 'Cahul', 'Chisinau', 'Comrat', 'Edinet', 'Orhei', 'Soroca', 'Stauceni', 'Tiraspol', 'Ungheni']
@@ -204,9 +205,9 @@ def get_all_columns():
 
 def init_files():
     cols = get_all_columns()
-    for file in [MAIN_CSV, SUB_CSV]:
-        if not os.path.exists(file):
-            pd.DataFrame(columns=cols).to_csv(file, index=False)
+    # Handle files initialization safely now that MAIN_CSV is a URL
+    if not os.path.exists(SUB_CSV):
+        pd.DataFrame(columns=cols).to_csv(SUB_CSV, index=False)
 
 init_files()
 
@@ -369,22 +370,12 @@ with tab1:
                             # The prediction block:
                             X_new_processed = preprocessor.transform(df_temp)
 
-                            # Updated to Direct Download Google Drive Export URL for dataset_min_main
-                            url_dataset = "https://docs.google.com/uc?export=download&id=1quji8xUbgNZYzZcv6vQJgcNaM7qZc0S9"
-
                             df_jobs = None
                             try:
-                                r_ds = requests.get(url_dataset, timeout=30)
-                                if r_ds.status_code == 200:
-                                    df_jobs = pd.read_csv(io.StringIO(r_ds.text))
+                                # Reading directly from Google Drive URL here
+                                df_jobs = pd.read_csv(MAIN_CSV)
                             except Exception:
-                                pass
-
-                            if df_jobs is None or df_jobs.empty:
-                                try:
-                                    df_jobs = pd.read_csv(MAIN_CSV)
-                                except Exception:
-                                    df_jobs = pd.DataFrame()
+                                df_jobs = pd.DataFrame()
 
                             total_possible = len(df_jobs)
 
@@ -408,7 +399,7 @@ with tab1:
                                     if realistic_score > 99.9: realistic_score = 99.9
                                     
                                     st.info(
-                                        f"**[{i+1}] {row.get('Job Title', 'Unknown Job')}**  \n"
+                                        f"**[{i+1}] {row.get('Job Title', 'Unknown Job')}** \n"
                                         f"🏢 **Company:** {row.get('Company', 'N/A')} | 💼 **Role:** {row.get('Role', 'N/A')}  \n"
                                         f"📞 **Contact:** {row.get('Contact', 'N/A')} | 🏢 **City:** {row.get('City', 'Unknown city')}  \n"
                                         f"💵 **Salary:** {row.get('Salary Range', 'N/A')}  \n"
@@ -426,7 +417,7 @@ with tab1:
 with tab2:
     st.header("Dataset Viewer")
    
-    # Loading main dataset
+    # Loading main dataset directly from Google Drive path variable
     try:
         df_main = pd.read_csv(MAIN_CSV)
     except Exception as e:
@@ -475,25 +466,16 @@ with tab3:
         else:
             with st.spinner("Analyzing CV against market data..."):
                 try:
-                    # Updated to Direct Download Google Drive Export URL for data_for_api
-                    url_data_for_api = "https://docs.google.com/uc?export=download&id=1DF-qFFj0pEzFoJAnX0k32Qh12MI363Q1"
-                    
                     df_upd = None
                     try:
-                        r_api = requests.get(url_data_for_api, timeout=30)
-                        if r_api.status_code == 200:
-                            df_upd = pd.read_csv(io.StringIO(r_api.text))
-                    except Exception:
-                        pass
+                        # CHANGED HERE: Fetching data_for_api directly from the direct-link Google Drive url
+                        url_data_for_api = "https://docs.google.com/uc?export=download&id=1DF-qFFj0pEzFoJAnX0k32Qh12MI363Q1"
+                        df_upd = pd.read_csv(url_data_for_api)
+                    except Exception as e:
+                        st.error(f"Could not load data_for_api from Google Drive. Error: {e}")
+                        df_upd = pd.DataFrame()
 
-                    if df_upd is None or df_upd.empty:
-                        try:
-                            df_upd = pd.read_csv('data_for_api.csv')
-                        except Exception as e:
-                            st.error(f"Could not load data_for_api locally. Ensure fallback file is present. Error: {e}")
-                            df_upd = pd.DataFrame()
-
-                    if not df_upd.empty:
+                    if df_upd is not None and not df_upd.empty:
                         sample_data = df_upd.head(5000).to_csv(index=False, sep='|')
                     else:
                         sample_data = "DATA NOT FOUND"
