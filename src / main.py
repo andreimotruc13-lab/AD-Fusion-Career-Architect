@@ -28,12 +28,9 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
 import requests
 
-
-    
 # detectam calea catre folder
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Loading models securizat prin descărcare directă
-@st.cache_resource
 @st.cache_resource
 def load_ml_models():
     import sys
@@ -84,9 +81,6 @@ def load_ml_models():
         return None, None, f"Eroare la incarcare modele: {str(e)}"
 
 recommender, preprocessor, ml_status = load_ml_models()
-ml_loaded = (ml_status is True)
-
-# ml_status va fi True 
 ml_loaded = (ml_status is True)
 
 if not ml_loaded:
@@ -235,7 +229,6 @@ st.sidebar.markdown(
     Our goal is to reduce unemployment and emigration in the Republic of Moldova by giving every
     person the chance to contribute creatively to the development of society and to create a better life
     for all its residents. Now is your moment. Get employed and move closer to achieving your dream."""
-
 )
 
 # Main app tabs
@@ -376,9 +369,9 @@ with tab1:
                             # The prediction block:
                             X_new_processed = preprocessor.transform(df_temp)
 
-                            url_dataset = "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/src/dataset_min_main.csv"
+                            # Updated to Direct Download Google Drive Export URL for dataset_min_main
+                            url_dataset = "https://docs.google.com/uc?export=download&id=1quji8xUbgNZYzZcv6vQJgcNaM7qZc0S9"
 
-                            # FIX 1: folosim requests.get() in loc de pd.read_csv(url) direct
                             df_jobs = None
                             try:
                                 r_ds = requests.get(url_dataset, timeout=30)
@@ -395,12 +388,9 @@ with tab1:
 
                             total_possible = len(df_jobs)
 
-
-
                             if total_possible == 0:
                                 st.error(f"⚠️ The dataset is currently empty. Direct download failed.")
                             else:
-                                # FIX 2: eliminat codul duplicat, totul intr-un singur bloc
                                 search_k = min(300, total_possible)
 
                                 distances, indices = recommender.kneighbors(X_new_processed, n_neighbors=search_k)
@@ -412,11 +402,11 @@ with tab1:
 
                                 for i, (idx, row) in enumerate(results.iterrows()):
                                     raw_dist = row['distance']
-                                   
+                                    
                                     strictness = 1.5
                                     realistic_score = np.exp(-strictness * raw_dist) * 100
                                     if realistic_score > 99.9: realistic_score = 99.9
-                                   
+                                    
                                     st.info(
                                         f"**[{i+1}] {row.get('Job Title', 'Unknown Job')}**  \n"
                                         f"🏢 **Company:** {row.get('Company', 'N/A')} | 💼 **Role:** {row.get('Role', 'N/A')}  \n"
@@ -430,7 +420,6 @@ with tab1:
                             st.error(f"⚠️ Could not generate recommendations. Error: {e}")
                 else:
                     st.warning(f"⚠️ Model Status: {ml_status}")
-
 
 
 # Tab 2: Dataset viewer
@@ -486,11 +475,27 @@ with tab3:
         else:
             with st.spinner("Analyzing CV against market data..."):
                 try:
+                    # Updated to Direct Download Google Drive Export URL for data_for_api
+                    url_data_for_api = "https://docs.google.com/uc?export=download&id=1DF-qFFj0pEzFoJAnX0k32Qh12MI363Q1"
+                    
+                    df_upd = None
                     try:
-                        df_upd = pd.read_csv('data_for_api.csv')
+                        r_api = requests.get(url_data_for_api, timeout=30)
+                        if r_api.status_code == 200:
+                            df_upd = pd.read_csv(io.StringIO(r_api.text))
+                    except Exception:
+                        pass
+
+                    if df_upd is None or df_upd.empty:
+                        try:
+                            df_upd = pd.read_csv('data_for_api.csv')
+                        except Exception as e:
+                            st.error(f"Could not load data_for_api locally. Ensure fallback file is present. Error: {e}")
+                            df_upd = pd.DataFrame()
+
+                    if not df_upd.empty:
                         sample_data = df_upd.head(5000).to_csv(index=False, sep='|')
-                    except Exception as e:
-                        st.error(f"Could not load data_for_api.csv. Ensure the file is in the correct directory. Error: {e}")
+                    else:
                         sample_data = "DATA NOT FOUND"
 
                     active_key = st.secrets["OPENROUTER_API_KEY"]
@@ -553,7 +558,7 @@ with tab3:
                             </div>
                             """,
                             unsafe_allow_html=True
-                    )
+                        )
                     else:
                         st.error("The API returned nothing. Check your token count or connection.")
 
