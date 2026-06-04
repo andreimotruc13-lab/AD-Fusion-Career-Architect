@@ -1,37 +1,157 @@
-# A&D-Fusion
-The A&D Fusion Career Architect project represents a technological solution in response to the challenges of the labor market in the Republic of Moldova. This AI-based platform was created to halt the phenomena affecting the country's economy and people's lives, such as massive migration, unemployment, and the acute shortage of skilled workers. By utilizing artificial intelligence, the platform successfully matches user skills with available job offers, facilitating the recruitment and professional orientation process.
+A&D Fusion Career Architect — Intelligent Professional Modeling Platform (Simulation Prototype)
+The A&D Fusion Career Architect project represents a simulated technological prototype developed to demonstrate how an AI-based platform could address the structural challenges of the labor market in the Republic of Moldova. This proof of concept is designed to model potential solutions for systemic issues affecting the country's economy, such as massive migration, unemployment, and the acute shortage of skilled workers.
 
-The platform combats migration by highlighting local opportunities that match each user's profile, giving young people concrete reasons to build a future at home instead of seeking alternatives abroad due to a lack of information. At the same time, unemployment is significantly reduced through a high-precision matching system that eliminates human error and time lost in simple recruitment processes, ensuring rapid and convenient employment.
-Furthermore, the specialist deficit is addressed using a vast dataset of over 100,000 job descriptions (we sourced the raw dataset from Kaggle: link, then sampled it down to 100,000 entries to maintain high data quality and computational efficiency) , which allows the system to accurately identify job offers where the user's specific skills are required, directing the workforce exactly where the market needs it most. The model analyzes complex job descriptions and guides users exactly in the directions demanded by the market. Thus, A&D Fusion Career Architect transforms a fragmented labor market into a clear one destined for everyone, which not only retains talent in the Republic of Moldova but also directs it to ensure the economic progress of the entire society.Furthermore, aligning salaries with the 1–5 qualification hierarchy provided a logical economic structure, ensuring the model outputs predictable and realistic compensation trends.
+Important Note on Project Scope: This platform is an advanced simulation and a functional prototype. It does not manage real-time job openings or ensure live, rapid employment. Instead, it serves to demonstrate approximately how an intelligent system would look, behave, and process data if populated with complete, production-scale real-world local market data. It visualizes how user skills could be algorithmically matched with available offers to facilitate recruitment and professional orientation.
+<img width="1919" height="909" alt="image" src="https://github.com/user-attachments/assets/5c1fc145-a41f-4df2-80fc-04312d4ba76b" />
 
-  Images:
-  
-We chose TruncatedSVD with 15 components and a technical weight of 20 to prioritize generalization over raw training accuracy. While other parameters showed higher scores, they risked overfitting by capturing noise within the dataset. Reducing the components to 15 forces the model to focus on the most significant job market patterns, acting as a regularizer. Similarly, the specific weighting ensures technical skills drive the matching logic without overshadowing other critical factors like location. This balanced approach prevents the model from simply memorizing the training data, ensuring more reliable and realistic recommendations for new users. We evaluated the model using a heatmap-based correlation analysis and confusion matrices to visualize how effectively it clusters similar roles. This verified that the model maintains high precision in matching user profiles to the most relevant job categories without overfitting:
-<img width="533" height="338" alt="Screenshot 2026-05-05 154315" src="https://github.com/user-attachments/assets/1a123619-e6b3-4fa1-8bf0-f371748ea226" />
-<img width="490" height="290" alt="Screenshot 2026-05-05 154348" src="https://github.com/user-attachments/assets/fc969574-2404-4b35-b47c-979fbbe9ed31" />
+By showing how a high-precision matching system operates, this simulation models how migration could be combated by highlighting localized opportunities that match a user's profile, providing a digital framework that gives young people visibility into building a career at home. It simulates a workflow where human error and time lost in traditional recruitment are minimized, outlining a blueprint for efficient career placement. Furthermore, the specialized worker deficit is modeled using a sampled dataset of 100,000 job descriptions (sourced originally from Kaggle and downsampled to maintain computational efficiency and high data quality), allowing the system to demonstrate how workforce allocation can be optimized based on market demands. To anchor this simulation in realistic economic structures, salaries were aligned with a 1–5 qualification ierarhy, ensuring the model outputs predictable and logical compensation trends.
+<img width="1523" height="904" alt="image" src="https://github.com/user-attachments/assets/7999bb27-b56b-4c9d-be38-5fb64fe78dca" />
 
-A&D Fusion description in website and the place when the users can put their API keys:
-<img width="248" height="883" alt="Screenshot 2026-05-05 153153" src="https://github.com/user-attachments/assets/67d74e81-2e2c-435a-9ded-8afb31c6a9e6" />
+System Architecture & Machine Learning Components
+The system is split into two fundamental, complementary models that collaborate to deliver precision recommendations and generative contextual feedback.
+While the primary model utilizes spatial distance algorithms to map structured user preferences, the secondary pipeline leverages a localized generative architecture to evaluate an unstructured text.
+<img width="784" height="226" alt="image" src="https://github.com/user-attachments/assets/a1a405c7-ad0d-4e73-b1d9-bf971fcf523c" />
 
-"This initial section of the platform allows users to input their professional preferences, skills, and desired benefits. The collected data serves as the foundation for the AI engine to filter and generate personalized career recommendations. By structuring these user attributes, the system ensures high-accuracy matching between candidates and potential opportunities:
-<img width="1919" height="907" alt="Screenshot 2026-05-04 231613" src="https://github.com/user-attachments/assets/62e51da7-137c-49b7-8ee0-513b4cff3104" />
-<img width="1910" height="895" alt="Screenshot 2026-05-04 234209" src="https://github.com/user-attachments/assets/d890ce83-b2e7-43da-b058-0ab392c42cb1" />
-<img width="1917" height="899" alt="image" src="https://github.com/user-attachments/assets/f47a6413-c4aa-4014-bcc8-5cbf3152647b" />
+1. Primary Model: job_datasets (Local Recommendation System)
+We chose unsupervised K-Nearest Neighbors (KNN) because it operates on "look-alike" logic, which is significantly more effective for recommendations than standard classification. Unlike "black-box" models, KNN identifies existing data points most similar to the user, providing high interpretability. It allows for the direct retrieval of multiple similar roles without the overhead of a lengthy training process.
 
-This section serves as the primary dataset containing structured information on skills and domains. The AI engine processes these specific data points to identify patterns and ensure an accurate match between the user's profile and the most relevant opportunities:
-<img width="1644" height="905" alt="Screenshot 2026-05-05 153311" src="https://github.com/user-attachments/assets/b44e3ef7-a81d-4726-8efc-e6b479343d00" />
+Dimensionality Reduction & Regularization: The architecture utilizes a pipeline that reduces dimensionality via TruncatedSVD (15 components) and applies a 20x weight to technical skills to prioritize core competencies. While other parameter configurations showed higher training scores, they risked overfitting by capturing noise within the dataset. Reducing the components to 15 forces the model to focus on the most significant job market patterns, acting as a regularizer. Similarly, the specific weighting ensures technical skills drive the matching logic without overshadowing other critical factors like location.
 
-This final page allows users to input their CV as text, enabling the AI to analyze their professional background in depth. The system then generates tailored job matches and provides actionable recommendations for future career improvements. By comparing the CV against market demands, the AI offers a strategic roadmap for professional growth:
-<img width="1549" height="862" alt="Screenshot 2026-05-05 213149" src="https://github.com/user-attachments/assets/2f72a3ce-b5d9-4e35-acdd-7f8bc55d2eda" />
-<img width="1849" height="894" alt="Screenshot 2026-05-05 213136" src="https://github.com/user-attachments/assets/e5515cc9-c208-4a4a-b087-b06be7077efa" />
-<img width="1910" height="906" alt="Screenshot 2026-05-05 213117" src="https://github.com/user-attachments/assets/9889a627-2888-4dca-ac71-b366fd6beaf7" />
+Consistency Metric Calibrations: To guarantee absolute mathematical consistency across scripts and execution states, the model employs a uniform strictness parameter (strictness = 1.5). The realistic matching score is derived from spatial distance utilizing the following exponential formula:
 
-This section displays the personalized results generated from the user's initial inputs, including their skills, experience, and professional preferences. The AI processes these specific attributes to rank and present the most compatible job opportunities with high precision. Additionally, users have the flexibility to customize the output by selecting exactly how many top results they wish to view:
-<img width="1468" height="838" alt="Screenshot 2026-05-05 153431" src="https://github.com/user-attachments/assets/e91a633c-9ecc-4ea6-bf48-62281608a0dd" />
-<img width="1453" height="836" alt="Screenshot 2026-05-05 153800" src="https://github.com/user-attachments/assets/94b5d874-7095-402f-b1d2-090e879fb9f2" />
+Realistic Score=min(e −strictness × raw_dist) × 100))
+This balanced approach prevents the model from simply memorizing training data, ensuring reliable and realistic recommendations for new profiles.
+
+We evaluated the model using a heatmap-based correlation analysis and confusion matrices to visualize how effectively it clusters similar roles. This verified that the model maintains high precision in matching user profiles to the most relevant job categories without overfitting:
+<img width="1370" height="805" alt="Screenshot 2026-05-03 161051" src="https://github.com/user-attachments/assets/6be2960f-30d4-46e1-8cab-74cfc54da16a" />
+<img width="490" height="290" alt="Screenshot 2026-05-05 154348" src="https://github.com/user-attachments/assets/74c260cc-853c-43d9-bed3-b9a27805a091" />
+
+2. Secondary Model: CV Evaluation via Local RAG (Retrieval-Augmented Generation)
+The third tab addresses unstructured text data from user CVs. Rather than dropping raw CV text directly into an external cloud API—which would consume excessive tokens and lack local context—the platform implements a localized RAG architecture:
+
+[ User CV (Raw Text) ] 
+          │
+          ▼
+[ Local NLP Engine: TF-IDF ] ──(Cosine Similarity)──> [ Local Dataset (Top 15 Jobs) ]
+                                                               │
+                                                               ▼
+[ OpenRouter API: owl-alpha ] <───(Enriched Context Feed)──────┘
+          │
+          ▼
+[ Tailored Feedback & STAR Method Optimization Roadmap ]
+Local NLP Processing (TF-IDF): The uploaded CV text is vectorized locally using a TF-IDF (Term Frequency-Inverse Document Frequency) pipeline. This acts as our local NLP engine, breaking down text features and identifying skill weights without external network dependencies.
+
+Context Filtering via Cosine Similarity: The system calculates the similarity between the CV vector and the dataset rows, extracting the top 15 most relevant job entries.
+
+
+LLM Inference (Owl Alpha): Owl Alpha was selected as our core generative engine via OpenRouter primarily due to its massive 1-million-token context window. The model performs highly accurate cross-references between user profiles, cities, and salary benchmarks while strictly adhering to complex operational prompts, such as structuring career advice around the STAR method.
+<img width="748" height="275" alt="Screenshot 2026-06-03 211920" src="https://github.com/user-attachments/assets/47d1c4b0-dbdf-4c93-b062-ccd564ba091a" />
+
+
+max_features: 1000 (Dimensionality Control & Regularization)
+
+Limiting the TF-IDF vectorizer to the top 1,000 most important terms across the corpus acts as a robust regularizer. Instead of mapping every typo, unique edge-case word, or irrelevant formatting token, the model strictly focuses on core domain vocabulary (e.g., specific technologies, skills, and job titles). This optimization drastically prevents overfitting, reduces the memory footprint, and ensures ultra-fast matrix calculations during live deployment on Streamlit Cloud.
+
+ngram_range: (1, 1) (Unigram Efficiency)
+
+Using strictly single words (unigrams) ensures that key professional terms—such as "Python", "SQL", "React", or "Manager"—are captured with maximum weight. In professional modeling, expanding to bigrams or trigrams (e.g., (1, 2)) introduces significant vocabulary noise and inflates computational complexity without adding proportional semantic value, as most technical skills are distinct, single-word nouns.
+n_neighbors: 3 (High-Density Localized Matching)
+
+Setting the neighborhood size to 3 ensures that the recommendation logic is highly specific and tightly bound to the absolute closest look-alike professional profiles in the vector space. A higher number of neighbors would dilute the results by averaging preferences across broader, unrelated job roles, whereas a k=3 setup preserves distinct, sharp boundary lines between job classes.
+
+2. Justification of the 91.65% Scientific Precision
+The model demonstrates an exceptionally high precision of 91.65% during cross-validation. This high metric indicates that text-based features (such as skill sets, tools, and background summaries) naturally form highly distinct, predictable clusters within the 1,000-dimensional space.
+Because professional documentation uses standardized terminology, the distance vectors between a structured profile and its corresponding career track are mathematically unambiguous. This score proves that the model can reliably categorize and map an unparsed, raw text CV to its correct professional domain over 91 out of 100 times, minimizing mismatched career paths.
+
+3. Execution & Serialization (.pkl File Generation)
+Once the optimal configuration was discovered and validated, the pipeline assets were serialized into persistent binary files to decouple the heavy training phase from the lightweight application runtime:
+tfidf_vectorizer.pkl: Contains the complete trained vocabulary weights and Inverse Document Frequency (IDF) coefficients. This allows the live Streamlit application to instantly transform new user CV text into the exact same 1,000-feature mathematical space without needing to rebuild the vocabulary from scratch.
+recommender_text.pkl: Houses the fitted indexing structure and spatial distance configurations of the model.
+Both files were generated using the joblib optimization library and are automatically streamed at runtime directly into the cloud application infrastructure. This completely eliminates execution overhead, allowing users to receive complex AI career mapping roadmaps in milliseconds.
+<img width="1348" height="726" alt="image" src="https://github.com/user-attachments/assets/8ffe9f8b-ef38-408b-8adf-67ee8b129482" />
 
 
 
+   
+Data Engineering and Remote Storage Infrastructure:
+To maintain high data quality and computational efficiency, a raw dataset sourced from Kaggle was downsampled to a clean, robust baseline of 100,000 entries.
+
+Model Deployment & Storage: All trained machine learning models, vectorization pipelines, and structural weights are hosted on Hugging Face, ensuring rapid loading and separation of model assets from runtime code.
+
+Large-Scale Data Hosting: Due to file size limitations within Git repositories, the core datasets, including the preprocessed data/pentru_andrei.csv, are stored on Google Drive. These data files are integrated directly as remote access links within GitHub, keeping the repository lightweight and efficient.
+
+Data Preprocessing Pipeline
+To transform raw information into structured matrices suitable for the KNN algorithm, data passed through a rigorous pipeline:
+
+Category Mapping: Standardizing highly fragmented categories.
+<img width="1230" height="362" alt="image" src="https://github.com/user-attachments/assets/3580852c-5575-478e-80bd-a9959b0b79e8" />
+
+Label Encoding: Converting ordinal features into clear sequential indices.
+<img width="658" height="121" alt="image" src="https://github.com/user-attachments/assets/f3a15b5e-6ca2-4c4a-8172-2a0f7b033ba0" />
+
+One-Hot Encoding: Expanding nominal categorical variables into binary vectors to eliminate the risk of introducing artificial mathematical hierarchies into the distance algorithms.
+<img width="706" height="82" alt="image" src="https://github.com/user-attachments/assets/f103d101-3ab5-49be-9c15-e43bc1ccf88f" />
+
+Niche anomalies like "amphibian care" were explicitly identified and mapped into broader categories rather than deleted, preserving data diversity without distorting the matching logic. Once finalized, the clean matrix was deployed to our cloud storage workflow.
+
+API Transparency
+The application requires an OpenRouter API Key. This architecture leverages Streamlit Cloud for both secure API key management and live website hosting, guaranteeing absolute operational transparency. This cloud-native deployment strategy allows users and evaluation juries to verify a secure data flow, inspect how the prompt context is dynamically structured, and ensure that all background processing remains clean, safe, and entirely free from concealed black-box operations.
+<img width="475" height="104" alt="image" src="https://github.com/user-attachments/assets/0b9b5b4a-25fb-4005-a833-71e93d51c360" />
+
+
+Technical Evaluation & Architectural Comparison
+The model achieved a precision score of 0.3, when tasting with the same dataset, representing a major performance lift in an unsupervised recommendation context. Across a complex dataset containing thousands of unique career configurations, this is approximately 150 times more accurate than random guessing, confirming that spatial distance vectors correspond deeply to actual professional paths.
+<img width="533" height="338" alt="Screenshot 2026-05-05 154315" src="https://github.com/user-attachments/assets/61285403-00f8-492d-bec5-701d08e7a862" />
+
+
+
+Architectural Approach Analysis
+1. Localized Precision
+Our Primary Model (KNN): Excellent. Specifically calibrated to mirror and model Moldovan market dynamics and localized salary structures using structured preference data.
+Our Secondary Model (TF-IDF RAG): Excellent. Successfully anchors unstructured CV text to localized domestic realities by filtering context through our curated local dataset before any generation takes place.
+Naive LLM Prompting: Poor. Large global models lack specific structural familiarity with small regional markets, resulting in generalized assumptions and inaccurate localized guidance.
+Classic Classification (e.g., Random Forest): Moderate. Effectively categorizes data but requires a rigid and continuous re-training schedule for any underlying dataset modification.
+
+2. Token Cost Efficiency
+Our Primary Model (KNN): Maximum efficiency. Operates 100% locally or within our secure cloud environment using pure mathematical distance calculations, generating zero external API token costs.
+Our Secondary Model (TF-IDF RAG): High efficiency. The local TF-IDF engine pre-filters and pipes only the 15 most relevant roles to the LLM, dramatically reducing external API token use compared to dumping raw text files.
+Naive LLM Prompting: Very low efficiency. Uploading massive raw profiles or complete datasets directly to a cloud API creates extensive, costly, and unnecessary token overhead.
+Classic Classification (e.g., Random Forest): Maximum efficiency. Operates with 100% local mathematical calculations, resulting in zero external API costs.
+
+3. Actionable Feedback Delivery
+Our Primary Model (KNN): Mathematically targeted. Ranks and presents structural look-alike career options with high interpretability based on spatial distance, though it does not output generative text.
+Our Secondary Model (TF-IDF RAG): Highly personalized and generative. Pinpoints precise, granular skill gaps and paths against locally filtered matches, delivering custom-tailored resumes optimization advice.
+Naive LLM Prompting: Generic. Frequently falls back on broad, non-specific career advice and standard platitudes without tying them to hard data.
+Classic Classification (e.g., Random Forest): Non-existent. Outputs a static numerical label, class index, or job ID without any textual elaboration or growth roadmap.
+
+4. Data Safety & Flow
+Our Primary Model (KNN): Maximum safety. All preference data scanning, vector matrices processing, and profile comparisons occur strictly within the isolated application runtime environment.
+Our Secondary Model (TF-IDF RAG): High safety. Unstructured documents are tokenized and scanned locally to find matching rows; only filtered, non-identifiable job profile contexts are transmitted for LLM inference.
+Naive LLM Prompting: Low safety. Exposes whole, unstructured, raw CV documents directly to external cloud systems without any local masking or pre-filtering.
+Classic Classification (e.g., Random Forest): Maximum safety. The entire data processing stream and predictive runtime remain completely local and self-contained.
+
+5. Categorization Style
+Our Primary Model (KNN): Fluid and flexible. Employs distance-based recommendations across continuous mathematical vectors, allowing users to discover unexpected adjacent career trajectories.
+Our Secondary Model (TF-IDF RAG): Hybrid semantic matching. Seamlessly bridges the gap between raw natural language text patterns and fixed dataset distributions.
+Naive LLM Prompting: Unpredictable. Highly susceptible to minor prompt variations, structural formatting changes, and random model hallucinations.
+Classic Classification (e.g., Random Forest): Rigid. Inflexibly forces multi-dimensional user profiles into strict, pre-defined, hard-coded binary categories.
+
+Limitations & Error Analysis
+The primary limitation involves semantic overlap, where the system occasionally confuses roles with nearly identical skill requirements (e.g., Data Analyst vs. BI Developer). This challenge slightly impacts both systems: the KNN primary model might calculate highly narrow spatial distances between these close vectors, while the TF-IDF secondary model might extract overlapping keyword weights.
+Additionally, because a sampled subset of 100,000 entries is utilized, rare or highly specialized roles may exhibit a lower density of near neighbors in the spatial matrix, slightly shrinking recommendation diversity for highly niche professional profiles.
+
+
+
+
+Ethics, Risks, and Future Horizons
+Data Privacy (user_submissions logging): To track model performance and analytical trends, user selections and submission attributes are securely compiled within a user_submissions repository. Crucially, this storage file completely excludes personal identifiers such as names, ensuring that data privacy is rigorously maintained while retaining anonymous profiles for platform evaluation.
+Potential Algorithmic Bias: As an inherent technical risk, because the primary model is trained on a historically sampled dataset, it may naturally favor highly populated industries over long-tail, niche career paths. Acknowledging this baseline bias is a critical first step for future dataset balancing.
+The "Echo Chamber" Risk: Like many distance-based recommendation engines, there is a risk of restricting users into rigid career boundaries based only on their past history. We recognize this limitation, and future updates intend to introduce structural variety to ensure users are exposed to broader, diverse career opportunities.
+The platform is designed to scale effortlessly, maintaining potential to integrate directly with regional Moldovan employment portals like anofm.md and angajat.md. Future iterations intend to evolve the CV analyzer into a comprehensive career coach via a complete chatbot interface, real-time market trend analytics, and advanced predictive search filters.
+
+
+
+The version of some of the libraries that we used:
 Libraries and Versions:
 Package                   Version
 ------------------------- -----------
@@ -47,59 +167,27 @@ streamlit                 1.57.0
 
 
 
-How to use our platform:
-1. Setup and Installation
-Access the Source Code: Begin by downloading or cloning the project files from the official GitHub repository.
-Install Dependencies: Open your terminal or command prompt in the project directory and install all necessary Python libraries (such as Pandas, Streamlit, and Scikit-learn) by running: pip install.
-Configure API Access: To enable the AI features, you must provide your own free API key from OpenRouter within the application settings or environment configuration.
 
-2. Running the Application
-Launch the Platform: Start the local server by executing the following command: streamlit run .\main.py.
-Company Overview: Once the website loads, you can read the detailed company description to understand the mission of A&D Fusion.
+How to Run and Use the Platform:
+1 Accessing the Live Web Application
+Because the platform is fully hosted and deployed via Streamlit Cloud, there is no need to download datasets, clone the repository, or execute local terminal startup commands. You can access the functional simulation prototype instantly through any browser using the official link:
 
-3. Personalized Job Evaluation
-Select Your Preferences: Navigate through the interactive sidebar or main menu to select options that best fit your profile, including your preferred city of employment.
-Skill and Benefit Filters: Input the number of professional skills you possess and select the specific benefits you desire from a workplace.
-Result Customization: Choose how many potential job matches you wish to receive after the system evaluates your responses.
+A&D Fusion Career Architect Deployment Link - https://ad-fusion-career-architect-tl4his6fhpdzauvlcruzub.streamlit.app/
 
-4. Data Exploration and AI CV Analysis
-Dataset Visualization: You can directly view and interact with the underlying dataset used for professional competency analysis.
-AI Recommender: Insert the text from your CV into the "AI Recommender" section.
-Future Career Pathing: The AI will analyze your CV to provide specific employment variants and personalized recommendations for future skill development based on your unique professional history.
+2 Step-by-Step Usage Guide for Optimal Model Performance
+To extract the most accurate, high-precision recommendations and comprehensive feedback from our integrated machine learning models, follow this operational workflow:
 
 
-
-Identification of Patterns and Anomalies
-Niche anomalies like "amphibian care" were identified and mapped into broader categories rather than deleted, preserving diversity without distorting the matching logic. This approach, combined with a weight of 20 for technical columns, ensured that core professional patterns drive the results. By grouping these outliers, the model successfully captures latent skill clusters while preventing unusual data points from compromising recommendation accuracy.
-
-
-
-Technical risks include algorithmic bias, where the model may favor common tech roles over niche paths. Ethically, we prioritize data privacy, ensuring CV data is processed securely. We also mitigate "echo chambers" to ensure recommendations don't unfairly restrict a user's exposure to diverse career opportunities.
-The platform is built for scale, with potential to integrate directly with local portals like anofm.md and angajat.md. Future versions could evolve the CV analyzer into a full-scale AI career coach via a complete chatbot interface. We also plan to implement advanced job search filters and real-time market trend analytics to provide a comprehensive employment ecosystem.
+Step 1: Calibrate Profile Preferences & Select Target Variants
+Geographic Focus: Select your target city from the dropdown options to anchor the spatial recommendation engines to localized salary structures.
+Filter Competencies & Benefits: Use the checkboxes and sliders to select all variations and skills that accurately match your profile. Taking the time to precisely select your exact technical capabilities allows the KNN Primary Model to calculate near-neighbor spatial distances with maximum precision.
+Adjust Match Density: Move the result slider to choose exactly how many ranked recommendations you want the model to display.
+<img width="1917" height="899" alt="Screenshot 2026-05-05 212823" src="https://github.com/user-attachments/assets/9c7db7d1-444d-4886-813d-56d895f4600f" />
 
 
-Why we chose KNN for our job recommendation model: We chose unsupervised K-Nearest Neighbors because it operates on "look-alike" logic, which is more effective for recommendations than standard classification. Unlike "black-box" models, KNN identifies existing data points most similar to the user, providing high interpretability. It was specifically selected over supervised alternatives because it allows for direct retrieval of multiple similar roles without the overhead of a lengthy training process.
-
-
-
-Owl Alpha was selected as the core engine for our third tab primarily due to its massive 1-million-token context window, which allows for the seamless integration of an entire 5,000-entry dataset into a single prompt. This eliminates the need for complex retrieval systems like RAG and prevents the loss of vital information that occurs when splitting data into smaller fragments. By keeping the a decent chunk of our Moldovan job market context "in-memory," the model can perform highly accurate cross-references between cities and salary benchmarks while strictly adhering to complex instructions like the STAR method for CV optimization. Choosing this model via OpenRouter ensures a high-performance, cost-effective solution that prioritizes data integrity and localized precision without the technical overhead of traditional vector databases.
-
-
-
-Model Architecture:
-The architecture utilizes a pipeline that reduces dimensionality via TruncatedSVD (15 components) and applies a 20x weight to technical skills to prioritize core competencies.
-The model achieved a precision score of 0.3, which represents a significant performance lift in an unsupervised recommendation context. In a dataset with thousands of unique job paths, this is approximately 150 times more accurate than random guessing, confirming that the spatial distances between skill vectors are highly meaningful.
-
-2) Error Analysis and Limitations
-The primary limitation involves "semantic overlap," where the model occasionally confuses roles with nearly identical skill sets (e.g., Data Analyst vs. BI Developer). Additionally, because we used a sampled 100k dataset, rare or highly specialized roles may have fewer "neighbors," slightly reducing recommendation diversity for niche profiles.
-
-3) Comparison with Alternative Models
-We tested supervised classifiers like Random Forest, but they were discarded as they forced users into rigid categories. KNN proved superior for a recommendation engine because it allows for fluid, distance-based matching across the entire feature space, providing a curated list of similar roles rather than a single, binary classification
-
-
-
-We evaluated the model using a heatmap-based correlation analysis and confusion matrices to visualize how effectively it clusters similar roles. This verified that the model maintains high precision in matching user profiles to the most relevant job categories without overfitting.
-
-
-
-The project successfully demonstrated that an unsupervised KNN model can transform raw labor market data into a highly precise recruitment tool. Achieving a performance lift 150 times greater than random guessing, the system accurately matches user profiles with relevant career paths and localized Moldovan salary trends. Beyond simple matching, the integrated CV Improver adds a critical layer of utility, providing actionable feedback to bridge the gap between a candidate's current skills and market demands. Together, these features provide a functional foundation for a scalable, AI-driven career ecosystem that offers both predictive insights and practical profile optimization.
+Step 2: Execute Interactive CV Analysis & Improvement
+Navigate to the AI Recommender tab inside the web interface.
+Paste CV as Raw Text: Copy the text from your existing resume document and paste it directly into the provided text submission box.
+Extract and Refine: Submit the text to trigger the TF-IDF local NLP engine. The system will scan your text features, compare them against the dataset using cosine similarity, and feed the top 15 matching contexts to the LLM.
+Review Your Actionable Roadmap: Study the generated evaluation report. To achieve the best real-world results from the model's output, update your profile following the customized STAR method roadmap to bridge the exact technical skill gaps highlighted by the simulation.
+<img width="1919" height="902" alt="Screenshot 2026-05-05 150948" src="https://github.com/user-attachments/assets/09e272e7-3134-4947-81f1-718a95e156f3" />
