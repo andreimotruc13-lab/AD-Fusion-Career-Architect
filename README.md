@@ -173,7 +173,7 @@ Step 1: Calibrate Profile Preferences & Select Target Variants
 Geographic Focus: Select your target city from the dropdown options to anchor the spatial recommendation engines to localized salary structures.
 Filter Competencies & Benefits: Use the checkboxes and sliders to select all variations and skills that accurately match your profile. Taking the time to precisely select your exact technical capabilities allows the KNN Primary Model to calculate near-neighbor spatial distances with maximum precision.
 Adjust Match Density: Move the result slider to choose exactly how many ranked recommendations you want the model to display.
-<img width="1917" height="899" alt="Screenshot 2026-05-05 212823" src="https://github.com/user-attachments/assets/9c7db7d1-444d-4886-813d-56d895f4600f" />
+<img width="1895" height="883" alt="image" src="https://github.com/user-attachments/assets/c0610cb5-af01-40ef-b2b3-6052bbfd9da2" />
 
 
 Step 2: Execute Interactive CV Analysis & Improvement
@@ -181,4 +181,5 @@ Navigate to the AI Recommender tab inside the web interface.
 Paste CV as Raw Text: Copy the text from your existing resume document and paste it directly into the provided text submission box.
 Extract and Refine: Submit the text to trigger the TF-IDF local NLP engine. The system will scan your text features, compare them against the dataset using cosine similarity, and feed the top 15 matching contexts to the LLM.
 Review Your Actionable Roadmap: Study the generated evaluation report. To achieve the best real-world results from the model's output, update your profile following the customized STAR method roadmap to bridge the exact technical skill gaps highlighted by the simulation.
-<img width="1919" height="902" alt="Screenshot 2026-05-05 150948" src="https://github.com/user-attachments/assets/09e272e7-3134-4947-81f1-718a95e156f3" />
+<img width="1905" height="910" alt="image" src="https://github.com/user-attachments/assets/ec58aab0-e852-43ed-b35e-0910c1f663f7" />
+
