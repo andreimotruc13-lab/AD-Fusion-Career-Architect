@@ -60,7 +60,7 @@ def load_ml_models():
     tfidf_path = os.path.join(MODELS_DIR, "tfidf_vectorizer.pkl")
     rec_text_path = os.path.join(MODELS_DIR, "recommender_text.pkl") 
     
-    # FIX: Removed '/src/' from paths and matched the exact filenames on Hugging Face
+
     urls = {
         "recommender_fixed.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/recommender_fixed.pkl", 
         "preprocessor_fixed.pkl": "https://huggingface.co/spaces/AndrIIII7/career-architect/resolve/main/preprocessor_fixed.pkl",
