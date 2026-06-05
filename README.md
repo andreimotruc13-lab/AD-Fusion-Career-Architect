@@ -145,6 +145,7 @@ Potential Algorithmic Bias: As an inherent technical risk, because the primary m
 The "Echo Chamber" Risk: Like many distance-based recommendation engines, there is a risk of restricting users into rigid career boundaries based only on their past history. We recognize this limitation, and future updates intend to introduce structural variety to ensure users are exposed to broader, diverse career opportunities.
 The platform is designed to scale effortlessly, maintaining potential to integrate directly with regional Moldovan employment portals like anofm.md and angajat.md. Future iterations intend to evolve the CV analyzer into a comprehensive career coach via a complete chatbot interface, real-time market trend analytics, and advanced predictive search filters.
 
+Class balance across occupational tracks was evaluated to protect long-tail local specializations from high-density clusters. To mitigate demographic and geographic discrimination from gender or city variables in the local data, the system enforces absolute algorithmic fairness via demographic masking. All sensitive tokens and location identifiers are scrubbed during vector calculations, ensuring the engine operates exclusively on objective qualifications and skills. Furthermore, validation is completely standardized across both engines using a unified multi-metric framework—Precision@k, Recall@k, and NDCG—paired with continuous error analysis loops to isolate precise keyword discrepancies.
 
 
 The version of some of the libraries that we used:
