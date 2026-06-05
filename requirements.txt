@@ -1,9 +1,8 @@
-streamlit
-pandas
-numpy==2.4.4
-scikit-learn
-joblib
-openai
-scikit-learn==1.8.0
+streamlit == 1.57.0
+pandas == 3.0.2
+numpy == 2.4.4
+sklearn == 1.8.0
+joblib == 1.5.3
+openai == 2.33.0
 huggingface_hub
-requests
+requests==2.33.1
