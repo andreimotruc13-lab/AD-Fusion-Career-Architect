@@ -12,6 +12,9 @@ The system is split into two fundamental, complementary models that collaborate 
 While the primary model utilizes spatial distance algorithms to map structured user preferences, the secondary pipeline leverages a localized generative architecture to evaluate an unstructured text.
 <img width="784" height="226" alt="image" src="https://github.com/user-attachments/assets/a1a405c7-ad0d-4e73-b1d9-bf971fcf523c" />
 
+To ensure scientific rigor, system validation relies on pre-defined targets instead of post-facto metrics, setting operational baselines at 90.0% Precision@5 for text classification and a 100x lift over random assignment for structured matching. Both subsystems utilize standardized job roles as the primary evaluation target. To prevent data leakage and score inflation, the preprocessing pipeline structurally isolates all feature transformations from the target labels, enforcing a strict operational separation during validation to guarantee models are continuously benchmarked on entirely unseen profile architectures.
+
+
 1. Primary Model: job_datasets (Local Recommendation System)
 We chose unsupervised K-Nearest Neighbors (KNN) because it operates on "look-alike" logic, which is significantly more effective for recommendations than standard classification. Unlike "black-box" models, KNN identifies existing data points most similar to the user, providing high interpretability. It allows for the direct retrieval of multiple similar roles without the overhead of a lengthy training process.
 
@@ -25,6 +28,8 @@ This balanced approach prevents the model from simply memorizing training data, 
 We evaluated the model using a heatmap-based correlation analysis and confusion matrices to visualize how effectively it clusters similar roles. This verified that the model maintains high precision in matching user profiles to the most relevant job categories without overfitting:
 <img width="1370" height="805" alt="Screenshot 2026-05-03 161051" src="https://github.com/user-attachments/assets/6be2960f-30d4-46e1-8cab-74cfc54da16a" />
 <img width="490" height="290" alt="Screenshot 2026-05-05 154348" src="https://github.com/user-attachments/assets/74c260cc-853c-43d9-bed3-b9a27805a091" />
+
+The component configuration within the TruncatedSVD pipeline was selected to achieve an optimal middle ground in variance retention. While altering the dimensions yielded higher localized precision during specific iterations, a balanced architectural threshold was chosen to retain a significant portion of the original dataset's information while successfully filtering out redundant structural noise. This calibrated spatial approach avoids forcing user profiles into rigid, predefined boundaries, providing fluid, vector-based recommendations across adjacent career paths while maintaining overall model stability and generalization.
 
 2. Secondary Model: CV Evaluation via Local RAG (Retrieval-Augmented Generation)
 The third tab addresses unstructured text data from user CVs. Rather than dropping raw CV text directly into an external cloud API—which would consume excessive tokens and lack local context—the platform implements a localized RAG architecture:
