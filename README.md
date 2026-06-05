@@ -42,6 +42,8 @@ The third tab addresses unstructured text data from user CVs. Rather than droppi
 [ User CV (Raw Text) ]-[ Local NLP Engine: TF-IDF ] ── (Cosine Similarity)──> [ Local Dataset (Top 15 Jobs) ]-[ OpenRouter API: owl-alpha ] <───(Enriched Context Feed)──────[ Tailored Feedback & STAR Method Optimization Roadmap ]
 Local NLP Processing (TF-IDF): The uploaded CV text is vectorized locally using a TF-IDF (Term Frequency-Inverse Document Frequency) pipeline. This acts as our local NLP engine, breaking down text features and identifying skill weights without external network dependencies.
 
+<img width="1324" height="426" alt="image" src="https://github.com/user-attachments/assets/78e8469e-271e-4d5d-a1c8-a6cfde774179" />
+
 Context Filtering via Cosine Similarity: The system calculates the similarity between the CV vector and the dataset rows, extracting the top 15 most relevant job entries.
 
 
