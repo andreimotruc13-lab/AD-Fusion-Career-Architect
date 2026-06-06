@@ -521,7 +521,7 @@ with tab3:
                     """
 
                     response = client.chat.completions.create(
-                        model="poolside/laguna-m.1:free",
+                        model="openrouter/owl-alpha",
                         messages=[
                             {"role": "system", "content": system_instructions},
                             {"role": "user", "content": f"Here is my CV:\n{cv_text}"}
